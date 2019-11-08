@@ -13,6 +13,7 @@ from rest_framework.utils import json
 from rest_framework.views import APIView
 
 from interactive_content.models import Contenido, Curso, ContenidoInteractivo
+from interactive_content.permissions import ProfesorOwnsInteractiveContent
 from interactive_content.serializers import CursoSerializer, ContenidoInteractivoSerializer, ContenidoSerializer
 
 
@@ -195,3 +196,10 @@ class ContInteractivoView(ListModelMixin, CreateModelMixin, GenericAPIView):
             return response
         else:
             return JsonResponse({'message': 'Unauthorized'}, status=401)
+
+
+class ContenidoInteractivoDetail(APIView):
+    queryset = ContenidoInteractivo.objects.all()
+    serializer_class = ContenidoInteractivoSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated, ProfesorOwnsInteractiveContent)

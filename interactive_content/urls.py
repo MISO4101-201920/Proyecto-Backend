@@ -12,5 +12,6 @@ urlpatterns = [
     url(r'^interactive_content/$', views.interactive_contents_view, name='interactive_content'),
     url(r'^content/$', views.contents_view , name='content'),
     path('cont_interactivo', views.ContInteractivoView.as_view(), name='cont_interactivo'),
-    url(r'^courses/(?P<content_id>\d+)/$', views.courses_content_view, name='courses')
+    url(r'^courses/(?P<content_id>\d+)/$', views.courses_content_view, name='courses'),
+    url(r'^interactivecontent/(?P<pk>[0-9]+)$', views.ContenidoInteractivoDetail.as_view(), name='interactive_content')
 ]

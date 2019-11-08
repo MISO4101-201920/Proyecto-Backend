@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from activities.serializers import MarcaSerializer
 from interactive_content.models import Contenido, Curso, ContenidoInteractivo
 
 
@@ -19,8 +20,10 @@ class CursoSerializer(serializers.ModelSerializer):
 
 
 class ContenidoInteractivoSerializer(serializers.ModelSerializer):
-    curso = CursoSerializer(read_only=True, many=True)
+    cursos = CursoSerializer(read_only=True, many=True)
     contenido = ContenidoSerializer(read_only=True)
+    marcas = MarcaSerializer(read_only=True, many=True)
+
 
     class Meta:
         model = ContenidoInteractivo
