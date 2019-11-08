@@ -135,7 +135,7 @@ if '/app' in os.environ['HOME']:
 
     django_heroku.settings(locals())
 
-# sslmode issue workaround (dev)
+# sslmode issue workaround (local dev)
 # import django_heroku
 # django_heroku.settings(locals())
 # del DATABASES['default']['OPTIONS']['sslmode']
