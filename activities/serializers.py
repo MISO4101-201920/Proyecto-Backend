@@ -28,7 +28,7 @@ class OpcionmultipleSerializer(serializers.ModelSerializer):
 
 
 class PreguntaOpcionMultipleSerializer(serializers.ModelSerializer):
-    opcionmultiple_set = OpcionmultipleSerializer(read_only=True, many=True)
+    opciones = OpcionmultipleSerializer(read_only=True, many=True)
 
     class Meta:
         model = PreguntaOpcionMultiple
