@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.renderers import JSONRenderer
@@ -198,7 +198,7 @@ class ContInteractivoView(ListModelMixin, CreateModelMixin, GenericAPIView):
             return JsonResponse({'message': 'Unauthorized'}, status=401)
 
 
-class ContenidoInteractivoDetail(APIView):
+class ContenidoInteractivoDetail(RetrieveUpdateDestroyAPIView):
     queryset = ContenidoInteractivo.objects.all()
     serializer_class = ContenidoInteractivoSerializer
     authentication_classes = (TokenAuthentication,)
