@@ -220,7 +220,7 @@ class CalificacionCase(TestCase):
         url = '/activities/calificacion?estudiante=1'
         response = self.client.get(url, format='json')
         current_data = json.loads(response.content)
-        self.assertEqual(len(current_data), 1)
+        self.assertEqual(len(current_data), estudiante1.calificacion_set.all().count())
 
     def test_filter_calificaiones_by_question(self):
         profe = Profesor.objects.create(
@@ -248,10 +248,10 @@ class CalificacionCase(TestCase):
         calificacion3 = Calificacion.objects.create(
             estudiante=estudiante1, actividad=pregunta2, calificacion=5.0)
 
-        url = '/activities/calificacion?actividad=1'
+        url = '/activities/calificacion?actividad={}'.format(pregunta.id)
         response = self.client.get(url, format='json')
         current_data = json.loads(response.content)
-        self.assertEqual(len(current_data), 1)
+        self.assertEqual(current_data['count'], pregunta.calificacion_set.all().count())
 
     def test_filter_obligatory(self):
         profe = Profesor.objects.create(
