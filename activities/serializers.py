@@ -31,5 +31,11 @@ class PreguntaOpcionMultipleSerializer(serializers.ModelSerializer):
     opcionmultiple_set = OpcionmultipleSerializer(read_only=True, many=True)
 
     class Meta:
-        model = RespuestmultipleEstudiante
+        model = PreguntaOpcionMultiple
+        fields = '__all__'
+
+
+class OpcionMultipleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Opcionmultiple
         fields = '__all__'

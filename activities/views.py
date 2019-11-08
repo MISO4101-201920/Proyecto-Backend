@@ -1,19 +1,18 @@
-from rest_framework.generics import GenericAPIView
-from rest_framework.mixins import ListModelMixin, CreateModelMixin
-from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
-from rest_framework.response import Response
 from rest_framework.views import APIView
-
-from activities.serializers import MarcaSerializer, ActividadSerializer, RespuestaMultipleEstudianteSerializer, \
-    PreguntaOpcionMultipleSerializer
 from interactive_content.models import ContenidoInteractivo
 from users.models import Profesor
 from django.http import HttpResponseNotFound
-
-
-from .models import Marca, Actividad, RespuestmultipleEstudiante, RespuestaVoF, Opcionmultiple, PreguntaOpcionMultiple
+from rest_framework.generics import GenericAPIView, ListCreateAPIView
+from rest_framework.mixins import ListModelMixin, CreateModelMixin
+from rest_framework import generics
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
+from rest_framework.response import Response
+from django.http import JsonResponse
+from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, RespuestaSeleccionMultipleSerializer, MarcaSerializer
+from activities.models import Calificacion,  Marca, Actividad, RespuestmultipleEstudiante,\
+    Opcionmultiple, PreguntaOpcionMultiple
 
 
 # Create your views here.
@@ -72,59 +71,6 @@ class MarcaView(ListModelMixin, CreateModelMixin, GenericAPIView):
         return self.create(request, *args, **kwargs)
 
 
-class ActividadView(ListModelMixin, CreateModelMixin, GenericAPIView):
-    # Add permissions to the view
-    # permission_classes = [IsAuthenticated]
-
-    # queryset usado para retornar los objetos requeridos
-    def get_queryset(self):
-        # Add filter to get all the activities of a desired Marca
-        marca = self.request.query_params.get('marca', None)
-        return Actividad.objects.filter(marca=marca)
-
-    # clase serializer para la transformacion de datos del request
-    serializer_class = ActividadSerializer
-
-    def perform_create(self, serializer):
-        marca = get_object_or_404(
-            Marca, id=self.request.data.get('marca'))
-        return serializer.save(marca=marca)
-
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, *kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-
-class RespEstudianteMultipleView(ListModelMixin, CreateModelMixin, GenericAPIView):
-    # Add permissions to the view
-    # permission_classes = [IsAuthenticated]
-
-    # Add filter fields for the API
-    filterset_fields = ("estudiante", "respuestmultiple")
-
-    # queryset usado para retornar los objetos requeridos
-    def get_queryset(self):
-        # Add filter to get all the answers of a desired student
-        estudiante = self.request.query_params.get('estudiante', None)
-        return RespuestmultipleEstudiante.objects.filter(estudiante=estudiante)
-
-    # clase serializer para la transformacion de datos del request
-    serializer_class = RespuestaMultipleEstudianteSerializer
-
-    def perform_create(self, serializer):
-        pregunta = get_object_or_404(
-            Opcionmultiple, id=self.request.data.get('preguntaSeleccionMultiple'))
-        return serializer.save(preguntaSeleccionMultiple=pregunta)
-
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, *kwargs)
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-
 class CreatePreguntaSeleccionMultiple(APIView):
     def post(self, request, *args, **kwargs):
         question_data = request.data
@@ -141,21 +87,8 @@ class CreatePreguntaSeleccionMultiple(APIView):
         return Response(data=PreguntaOpcionMultipleSerializer(question).data)
 
 
-from rest_framework.generics import GenericAPIView, ListCreateAPIView
-from rest_framework.mixins import ListModelMixin, CreateModelMixin
-from rest_framework import generics, permissions, serializers, viewsets
-from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework import status
-from rest_framework.response import Response
-from django.http import JsonResponse
-
-from activities.serializers import PreguntaSeleccionMultipleSerializer, CalificacionSerializer, RespuestaSeleccionMultipleSerializer, MarcaSerializer
-from activities.models import Calificacion, PreguntaOpcionMultiple, RespuestmultipleEstudiante, Opcionmultiple, Marca
-
-
 class DetailPreguntaSeleccionMultiple(generics.RetrieveUpdateDestroyAPIView, ListModelMixin):
-    serializer_class = PreguntaSeleccionMultipleSerializer
+    serializer_class = PreguntaOpcionMultipleSerializer
     lookup_url_kwarg = "marca"
 
     def get_queryset(self):
@@ -173,7 +106,7 @@ class PreguntaView(ListModelMixin, CreateModelMixin, GenericAPIView):
     # Add filter fields for the API
     filterset_fields = ("actividad",)
     # clase serializer para la transformacion de datos del request
-    serializer_class = PreguntaSeleccionMultipleSerializer
+    serializer_class = PreguntaOpcionMultipleSerializer
 
     # def get_queryset(self):
     # actividad = self.request.query_params.get('actividad')
