@@ -3,13 +3,17 @@ from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from activities.serializers import MarcaSerializer, ActividadSerializer, RespuestaMultipleEstudianteSerializer
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from activities.serializers import MarcaSerializer, ActividadSerializer, RespuestaMultipleEstudianteSerializer, \
+    PreguntaOpcionMultipleSerializer
 from interactive_content.models import ContenidoInteractivo
 from users.models import Profesor
 from django.http import HttpResponseNotFound
 
 
-from .models import Marca, Actividad, RespuestmultipleEstudiante, RespuestaVoF, Opcionmultiple
+from .models import Marca, Actividad, RespuestmultipleEstudiante, RespuestaVoF, Opcionmultiple, PreguntaOpcionMultiple
 
 
 # Create your views here.
@@ -119,3 +123,19 @@ class RespEstudianteMultipleView(ListModelMixin, CreateModelMixin, GenericAPIVie
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
+
+class CreatePreguntaSeleccionMultiple(APIView):
+    def post(self, request, *args, **kwargs):
+        question_data = request.data
+        marca_id = question_data.pop('marca_id', None)
+        if not marca_id:
+            interactive_content = ContenidoInteractivo.objects.get(id=question_data['marca'].pop('contenido_id'))
+            marca = Marca.objects.create(contenido=interactive_content, **question_data.pop('marca'))
+        else:
+            marca = Marca.objects.get(pk=marca_id)
+        options = question_data.pop('opciones')
+        question = PreguntaOpcionMultiple.objects.create(marca=marca, **question_data)
+        for option in options:
+            Opcionmultiple.objects.create(preguntaSeleccionMultiple=question, **option)
+        return Response(data=PreguntaOpcionMultipleSerializer(question).data)
