@@ -4,7 +4,7 @@ from users.models import Profesor
 from django.http import HttpResponseNotFound
 from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
-from rest_framework import generics
+from rest_framework import generics, serializers
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
@@ -174,8 +174,13 @@ class CalificarAPI(ListCreateAPIView):
         activity = self.request.query_params.get('actividad', None)
         if (student):
             return Calificacion.objects.filter(estudiante=student)
-        if (activity):
+        elif (activity):
             return Calificacion.objects.filter(actividad=activity)
+        else:
+            return Calificacion.objects.filter(actividad=None)
+        
+        
+            
 
 
 class MarcaApi(ListModelMixin, GenericAPIView):

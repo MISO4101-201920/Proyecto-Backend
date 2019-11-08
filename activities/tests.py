@@ -280,9 +280,10 @@ class CalificacionCase(TestCase):
             estudiante=estudiante1, actividad=pregunta2, calificacion=5.0)
 
         url = '/activities/calificacion'
-        response = self.client.get(url, format='json')
+        response = self.client.get(url, format='json')        
         current_data = json.loads(response.content)
-        self.assertEqual(len(current_data), 0)
+
+        self.assertEqual(len(current_data['results']), 0)
 
     def test_create_calificacion(self):
         profe = Profesor.objects.create(
