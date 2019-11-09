@@ -214,4 +214,3 @@ class ContenidoInteractivoDetail(RetrieveUpdateDestroyAPIView):
     queryset = ContenidoInteractivo.objects.all()
     serializer_class = ContenidoInteractivoSerializer
     authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated)
