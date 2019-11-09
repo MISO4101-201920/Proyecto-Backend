@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.utils import json
 from rest_framework.views import APIView
 
-from interactive_content.models import Contenido, Curso, ContenidoInteractivo
+from interactive_content.models import Contenido, Curso, ContenidoInteractivo, Grupo
 from interactive_content.permissions import ProfesorOwnsInteractiveContent
 from interactive_content.serializers import CursoSerializer, ContenidoInteractivoSerializer, ContenidoSerializer
 
@@ -91,11 +91,16 @@ def courses_content_view(request, content_id):
     try:
         # Recuperar el contenido que creó el profesor
         contents = ContenidoInteractivo.curso.through.objects.filter(contenidointeractivo_id=content_id)
-        if not contents:
-            contents_list = Curso.objects.filter(profesor_id=user_id)
+        user = request.user
+        user_with_roll = user.get_real_instance()
+        if user_with_roll.__class__.__name__ == 'Profesor':
+            if not contents:
+                contents_list = Curso.objects.filter(profesor_id=user_id)
+            else:
+                contents_list = Curso.objects.filter(profesor_id=user_id).exclude(
+                    pk__in=Subquery(contents.values('curso_id')))
         else:
-            contents_list = Curso.objects.filter(profesor_id=user_id).exclude(
-                pk__in=Subquery(contents.values('curso_id')))
+            contents_list = Grupo.objects.filter(estudiante=user_with_roll).values_list('curso', flat=True)
 
     except (KeyError, Curso.DoesNotExist):
         # devolver vacio si no existe contenido creado por el usuario
