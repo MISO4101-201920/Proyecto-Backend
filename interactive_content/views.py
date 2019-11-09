@@ -123,7 +123,7 @@ def courses_view(request):
     # Tomando información del usuario
     user_id = request.user.id
     try:
-        # Recuperar el contenido que creó el profesor
+        # Recuperar los cursos que creó el profesor
         user = request.user
         user_with_roll = user.get_real_instance()
         if user_with_roll.__class__.__name__ == 'Profesor':
