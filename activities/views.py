@@ -21,14 +21,13 @@ from activities.models import Calificacion,  Marca, Actividad, RespuestmultipleE
 
 # Create your views here.
 @api_view(['GET'])
-#@authentication_classes([TokenAuthentication])
-#@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def reports(request, contentpk):
 
     #Get correct professor through token or session
     try:
-        #get_the_professor = Profesor.objects.get(id=request.user.id)
-        get_the_professor = Profesor.objects.get(id=2)
+        get_the_professor = Profesor.objects.get(id=request.user.id)
     except:
         return HttpResponseNotFound()
 
@@ -42,7 +41,7 @@ def reports(request, contentpk):
     big_json['facultad'] = get_the_professor.facultad
     big_json['marcas'] = []
 
-    marcas = Marca.objects.filter(contenido__contenido__profesor=get_the_professor)
+    marcas = Marca.objects.filter(contenido__contenido__profesor=get_the_professor, contenido_id=contentpk)
     for marca in marcas:
 
         big_json['marcas'].append({'nombre':marca.nombre,'preguntas':[]})
