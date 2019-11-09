@@ -124,7 +124,12 @@ def courses_view(request):
 
     try:
         # Recuperar el contenido que creó el profesor
-        contents_list = Curso.objects.filter(profesor_id=user_id).filter()
+        user = request.user
+        user_with_roll = user.get_real_instance()
+        if user_with_roll.__class__.__name__ == 'Profesor':
+            contents_list = Curso.objects.filter(profesor_id=user_id).filter()
+        else:
+            contents_list = Grupo.objects.filter(estudiante=user_with_roll).values_list('curso', flat=True)
     except (KeyError, Curso.DoesNotExist):
         # devolver vacio si no existe contenido creado por el usuario
         return JsonResponse({})
