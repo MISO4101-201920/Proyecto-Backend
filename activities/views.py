@@ -1,27 +1,34 @@
-from rest_framework.views import APIView
-from interactive_content.models import ContenidoInteractivo
-from users.models import Profesor
-from django.http import HttpResponseNotFound
-from rest_framework.generics import GenericAPIView, ListCreateAPIView
+from rest_framework import status, generics, serializers
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.generics import GenericAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
-from rest_framework import generics, serializers
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.renderers import JSONRenderer
+from rest_framework.response import Response
+from rest_framework.utils import json
+from rest_framework.views import APIView
+
+from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework import status
-from rest_framework.response import Response
-from django.http import JsonResponse
+
+from users.models import Profesor
+from interactive_content.models import ContenidoInteractivo
 from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, RespuestaSeleccionMultipleSerializer, MarcaSerializer
 from activities.models import Calificacion,  Marca, Actividad, RespuestmultipleEstudiante,\
-    Opcionmultiple, PreguntaOpcionMultiple
-
+    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta
 
 # Create your views here.
-@csrf_exempt
-def reports(request):
+@api_view(['GET'])
+#@authentication_classes([TokenAuthentication])
+#@permission_classes([IsAuthenticated])
+def reports(request, contentpk):
 
     #Get correct professor through token or session
     try:
-        get_the_professor = Profesor.objects.get(id=request.user.id)
+        #get_the_professor = Profesor.objects.get(id=request.user.id)
+        get_the_professor = Profesor.objects.get(id=2)
     except:
         return HttpResponseNotFound()
 
@@ -38,11 +45,32 @@ def reports(request):
     marcas = Marca.objects.filter(contenido__contenido__profesor=get_the_professor)
     for marca in marcas:
 
-        big_json['marcas'].append({'nombre':marca.nombre,'actividades':[]})
-        actividades = Actividad.objects.filter(marca=marca)
+        big_json['marcas'].append({'nombre':marca.nombre,'preguntas':[]})
+        preguntas_multiples = PreguntaOpcionMultiple.objects.filter(marca=marca)
+        preguntas_vof = PreguntaFoV.objects.filter(marca=marca)
+        
+        for pregunta in preguntas_multiples:
+            if isinstance(pregunta, PreguntaOpcionMultiple):
+                big_json['marcas'][-1]['preguntas'].append({'pregunta':pregunta.enunciado, 'tipo':'multiple', 'total_respuestas':0,'opciones':[]})
+                opciones = Opcionmultiple.objects.filter(preguntaSeleccionMultiple=pregunta)
+                
+                cont = 0
+                for opcion in opciones:
+                    votos = RespuestmultipleEstudiante.objects.filter(respuestmultiple=opcion).count()
+                    cont+=votos
+                    big_json['marcas'][-1]['preguntas'][-1]['opciones'].append({'respuesta':opcion.opcion, 'esCorrecta': opcion.esCorrecta, 'votos':votos})
+                big_json['marcas'][-1]['preguntas'][-1]['total_respuestas'] = cont
 
-        for actividad in actividades:
-            big_json['marcas'][-1]['actividades'].append({'nombre':actividad.nombre, 'preguntas':[]})
+        for pregunta in preguntas_vof:
+            if isinstance(pregunta, PreguntaFoV):
+                big_json['marcas'][-1]['preguntas'].append({'pregunta':pregunta.pregunta, 'esCorrecta':pregunta.esVerdadero, 'tipo':'verdadero/falso', 'total_verdadero':0, 'total_falso':0, 'total_respuestas':0})
+                howManyTrue = RespuestaVoF.objects.filter(preguntaVoF=pregunta, esVerdadero=True).count() #"howTrue":value
+                howManyFalse = RespuestaVoF.objects.filter(preguntaVoF=pregunta, esVerdadero=False).count() #"howFalse":value
+                total_vf = howManyTrue + howManyFalse
+                big_json['marcas'][-1]['preguntas'][-1]['total_verdadero'] = howManyTrue
+                big_json['marcas'][-1]['preguntas'][-1]['total_falso'] = howManyFalse
+                big_json['marcas'][-1]['preguntas'][-1]['total_respuestas'] = total_vf
+
     return JsonResponse(big_json)
 
 
