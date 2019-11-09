@@ -121,7 +121,6 @@ def courses_content_view(request, content_id):
 def courses_view(request):
     # Tomando información del usuario
     user_id = request.user.id
-
     try:
         # Recuperar el contenido que creó el profesor
         user = request.user
