@@ -306,9 +306,12 @@ class CalificacionCase(TestCase):
         url = '/activities/calificacion'
         data = JsonResponse(
             {"estudiante": "1", "actividad": "1", "calificacion": "3.7"})
-        self.client.post(url, data)
+        self.client.post(url, {"estudiante": estudiante1.pk, "actividad": pregunta.pk, "calificacion": "3.7"})
+        data = JsonResponse(
+            {"estudiante": "2", "actividad": "1", "calificacion": "3.7"})
+        self.client.post(url, {"estudiante": estudiante2.pk, "actividad": pregunta.pk, "calificacion": "3.7"})
 
-        url = '/activities/calificacion?actividad=1'
+        url = '/activities/calificacion?actividad={}'.format(pregunta.pk)
         response = self.client.get(url, format='json')
-        current_data = json.loads(response.content)
-        self.assertEqual(len(current_data), 1)
+        current_data = json.loads(response.content)        
+        self.assertEqual(current_data['count'], 2)
