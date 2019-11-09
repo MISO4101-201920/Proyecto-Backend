@@ -129,7 +129,8 @@ def courses_view(request):
         if user_with_roll.__class__.__name__ == 'Profesor':
             contents_list = Curso.objects.filter(profesor_id=user_id).filter()
         else:
-            contents_list = Grupo.objects.filter(estudiante=user_with_roll).values_list('curso', flat=True)
+            cursos_ids = Grupo.objects.filter(estudiante=user_with_roll).values_list('curso_id', flat=True)
+            contents_list = Curso.objects.filter(pk__in=list(cursos_ids))
     except (KeyError, Curso.DoesNotExist):
         # devolver vacio si no existe contenido creado por el usuario
         return JsonResponse({})
