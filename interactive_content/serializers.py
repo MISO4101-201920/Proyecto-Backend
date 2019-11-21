@@ -1,5 +1,7 @@
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 
+from activities.serializers import MarcaSerializer
 from interactive_content.models import Contenido, Curso, ContenidoInteractivo
 
 
@@ -19,9 +21,14 @@ class CursoSerializer(serializers.ModelSerializer):
 
 
 class ContenidoInteractivoSerializer(serializers.ModelSerializer):
-    curso = CursoSerializer(read_only=True, many=True)
+    cursos = SerializerMethodField('get_serialized_classes')
     contenido = ContenidoSerializer(read_only=True)
+    marcas = MarcaSerializer(read_only=True, many=True)
+
 
     class Meta:
         model = ContenidoInteractivo
         fields = '__all__'
+
+    def get_serialized_classes(self, obj):
+        return CursoSerializer(obj.curso.all(),many=True).data

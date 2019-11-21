@@ -24,10 +24,11 @@ class Contenido(models.Model):
 
 
 class ContenidoInteractivo(models.Model):
+    nombre = models.CharField(max_length=255, blank=False, null=False)
     contenido = models.ForeignKey(Contenido, blank=False, null=False, on_delete=models.CASCADE)
     fecha_creacion = models.DateTimeField(null=False, auto_now_add=True)
     tiempo_disponibilidad = models.DateTimeField(null=True, blank=True)
-    tiene_retroalimentacion = models.BooleanField()
+    tiene_retroalimentacion = models.BooleanField(null=True, blank=True)
     curso = models.ManyToManyField(Curso)
 
     class Meta:

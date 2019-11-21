@@ -1,8 +1,11 @@
 from django.contrib import admin
-from activities.models import Actividad, Calificacion, Marca, Pregunta, RespuestaAbiertaEstudiante, RespuestaVoF, Respuestmultiple, RespuestaEstudianteVoF, RespuestmultipleEstudiante
+
+from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, PreguntaFoV, PreguntaAbierta, RespuestmultipleEstudiante, RespuestaVoF, RespuestaAbiertaEstudiante, Calificacion
 
 # Register your models here.
 
-models = [Actividad, Calificacion, Marca, Pregunta, RespuestaAbiertaEstudiante, RespuestaVoF, Respuestmultiple, RespuestaEstudianteVoF, RespuestmultipleEstudiante]
+models = [Marca, PreguntaOpcionMultiple, Opcionmultiple, PreguntaFoV, PreguntaAbierta,
+          RespuestmultipleEstudiante, RespuestaVoF, RespuestaAbiertaEstudiante, Calificacion]
+
 
 admin.site.register(models)
