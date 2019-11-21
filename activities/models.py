@@ -42,6 +42,11 @@ class PreguntaAbierta(Actividad):
     enunciado = models.CharField(max_length=200)
 
 
+class Pausa(Actividad):
+    enunciado = models.CharField(max_length=200)
+    tiempo = models.FloatField(default=0)
+
+
 class PreguntaFoV(Actividad):
     pregunta = models.CharField(max_length=200)
     esVerdadero = models.BooleanField()
