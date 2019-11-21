@@ -13,7 +13,6 @@ from rest_framework.utils import json
 from rest_framework.views import APIView
 
 from interactive_content.models import Contenido, Curso, ContenidoInteractivo, Grupo
-from interactive_content.permissions import ProfesorOwnsInteractiveContent
 from interactive_content.serializers import CursoSerializer, ContenidoInteractivoSerializer, ContenidoSerializer
 
 
@@ -120,11 +119,10 @@ def courses_content_view(request, content_id):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def courses_view(request):
-    # Tomando información del usuario
+    # Tomando información del usuario logueado
     user_id = request.user.id
-
     try:
-        # Recuperar el contenido que creó el profesor
+        # Recuperar los cursos que creó el profesor
         user = request.user
         user_with_roll = user.get_real_instance()
         if user_with_roll.__class__.__name__ == 'Profesor':
