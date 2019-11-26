@@ -114,29 +114,32 @@ class PreguntaTestCase(TestCase):
         print(response.context)
         self.assertEqual(response.status_code, 200)
 
+
 class PreguntaFoVTestCase(TestCase):
     def test_get_question(self):
         marca = escenario()
-        pregunta1 = PreguntaFoV(nombre='test', numeroDeIntentos=1, marca=marca, pregunta="¿Es python un lenguaje compilado?", esVerdadero=False)
+        pregunta1 = PreguntaFoV(nombre='test', numeroDeIntentos=1, marca=marca,
+                                pregunta="¿Es python un lenguaje compilado?", esVerdadero=False)
         pregunta1.save()
-        pregunta2 = PreguntaFoV(nombre='test2', numeroDeIntentos=1, marca=marca, pregunta="¿Django es un framework para apps móviles?", esVerdadero=False)
+        pregunta2 = PreguntaFoV(nombre='test2', numeroDeIntentos=1, marca=marca,
+                                pregunta="¿Django es un framework para apps móviles?", esVerdadero=False)
         pregunta2.save()
         url = "/activities/pregunta_f_v"
         response = self.client.get(url, formal='json')
-        current_data = json.loads(response.content)        
+        current_data = json.loads(response.content)
         self.assertEqual(len(current_data), 2)
-    
+
     def test_create_question(self):
         marca = escenario()
         url = "/activities/pregunta_f_v"
         response = self.client.post(url, {
             "nombre": "test",
-            "numeroDeIntentos":1,
-            "marca":marca,
+            "numeroDeIntentos": 1,
+            "marca": marca.pk,
             "pregunta": "¿Bogotá es la capital de Colombia?",
             "esVerdadero": True
         })
-        
+
         self.assertEqual(response.status_code, 201)
 
 
@@ -181,7 +184,7 @@ class RespuestaSeleccionTestCase(TestCase):
                                           "curso": grupo.id
                                           }
                                     )
-        
+
         print(response.context)
         print(response.content)
         self.assertEqual(response.status_code, 201)
@@ -245,7 +248,8 @@ class CalificacionCase(TestCase):
         url = '/activities/calificacion?estudiante=1'
         response = self.client.get(url, format='json')
         current_data = json.loads(response.content)
-        self.assertEqual(len(current_data), estudiante1.calificacion_set.all().count())
+        self.assertEqual(len(current_data),
+                         estudiante1.calificacion_set.all().count())
 
     def test_filter_calificaiones_by_question(self):
         profe = Profesor.objects.create(
@@ -276,7 +280,8 @@ class CalificacionCase(TestCase):
         url = '/activities/calificacion?actividad={}'.format(pregunta.id)
         response = self.client.get(url, format='json')
         current_data = json.loads(response.content)
-        self.assertEqual(current_data['count'], pregunta.calificacion_set.all().count())
+        self.assertEqual(current_data['count'],
+                         pregunta.calificacion_set.all().count())
 
     def test_filter_obligatory(self):
         profe = Profesor.objects.create(
@@ -305,7 +310,7 @@ class CalificacionCase(TestCase):
             estudiante=estudiante1, actividad=pregunta2, calificacion=5.0)
 
         url = '/activities/calificacion'
-        response = self.client.get(url, format='json')        
+        response = self.client.get(url, format='json')
         current_data = json.loads(response.content)
 
         self.assertEqual(len(current_data['results']), 0)
@@ -331,12 +336,14 @@ class CalificacionCase(TestCase):
         url = '/activities/calificacion'
         data = JsonResponse(
             {"estudiante": "1", "actividad": "1", "calificacion": "3.7"})
-        self.client.post(url, {"estudiante": estudiante1.pk, "actividad": pregunta.pk, "calificacion": "3.7"})
+        self.client.post(url, {"estudiante": estudiante1.pk,
+                               "actividad": pregunta.pk, "calificacion": "3.7"})
         data = JsonResponse(
             {"estudiante": "2", "actividad": "1", "calificacion": "3.7"})
-        self.client.post(url, {"estudiante": estudiante2.pk, "actividad": pregunta.pk, "calificacion": "3.7"})
+        self.client.post(url, {"estudiante": estudiante2.pk,
+                               "actividad": pregunta.pk, "calificacion": "3.7"})
 
         url = '/activities/calificacion?actividad={}'.format(pregunta.pk)
         response = self.client.get(url, format='json')
-        current_data = json.loads(response.content)        
+        current_data = json.loads(response.content)
         self.assertEqual(current_data['count'], 2)
