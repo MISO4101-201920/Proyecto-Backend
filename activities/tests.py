@@ -7,7 +7,7 @@ from rest_framework.utils import json
 from django.contrib.auth.models import User, AbstractUser
 
 from interactive_content.models import ContenidoInteractivo, Contenido, Curso, Grupo
-from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, RespuestmultipleEstudiante
+from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, RespuestmultipleEstudiante, PreguntaFoV
 from users.models import Profesor, Estudiante
 
 
@@ -116,9 +116,18 @@ class PreguntaTestCase(TestCase):
 
 class PreguntaFoVTestCase(TestCase):
     def test_get_question(self):
+        marca = escenario()
+        pregunta1 = PreguntaFoV(nombre='test', numeroDeIntentos=1, marca=marca, pregunta="¿Es python un lenguaje compilado?", esVerdadero=False)
+        pregunta1.save()
+        pregunta2 = PreguntaFoV(nombre='test2', numeroDeIntentos=1, marca=marca, pregunta="¿Django es un framework para apps móviles?", esVerdadero=False)
+        pregunta2.save()
         url = "/activities/pregunta_f_v"
         response = self.client.get(url, formal='json')
-        self.assertEqual(response.status_code, 200)
+        current_data = json.loads(response.content)
+        print('*' * 70)
+        print(current_data)
+        self.assertEqual(len(current_data), 2)
+
 
 
 class RespuestaSeleccionTestCase(TestCase):
