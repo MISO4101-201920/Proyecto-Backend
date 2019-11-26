@@ -16,9 +16,9 @@ from django.views.decorators.csrf import csrf_exempt
 from users.models import Profesor
 from interactive_content.models import ContenidoInteractivo
 from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, RespuestaSeleccionMultipleSerializer, MarcaSerializer,\
-    PreguntaFoVSerializer
+    PreguntaFoVSerializer, PausaSerializer
 from activities.models import Calificacion,  Marca, Actividad, RespuestmultipleEstudiante,\
-    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta
+    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta, Pausa
 
 # Create your views here.
 @api_view(['GET'])
@@ -144,8 +144,11 @@ class PreguntaFoVView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-def get_pause(request):
-    return JsonResponse({'msj': 'OK'})
+class GetPausesView(APIView):
+    def get(self, request, *args, **kwargs):
+        pauses = Pausa.objects.all()
+        serializer = PausaSerializer(pauses, many=True)
+        return Response(serializer.data)
             
 
 
