@@ -153,9 +153,18 @@ class PreguntaFoVTestCase(TestCase):
 
 class GetPauseTestCase(TestCase):
     def test_get_pause(self):
+        marca = escenario()
+        pausa1 = Pausa(nombre='prueba', marca=marca,
+                    enunciado='Este es el enunciado de la pausa', tiempo=12.0)
+        pausa1.save()
+        pausa2 = Pausa(nombre='prueba2', marca=marca,
+                    enunciado='Este es el enunciado de la pausa', tiempo=7.0)
+        pausa2.save()
         url = '/activities/pausas'
-        response = self.client.get(url, formal='json')
-        self.assertEqual(response.status_code, 200)
+        response = self.client.get(url, formal='json')        
+        current_data = json.loads(response.content)
+
+        self.assertEqual(len(current_data), 2)
 
 
 class RespuestaSeleccionTestCase(TestCase):
