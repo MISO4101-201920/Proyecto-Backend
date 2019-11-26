@@ -115,23 +115,11 @@ class PreguntaTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class PreguntaFoVTestCase(TestCase):
-    def test_get_question(self):
-        marca = escenario()
-        pregunta1 = PreguntaFoV(nombre='test', numeroDeIntentos=1, marca=marca,
-                                pregunta="¿Es python un lenguaje compilado?", esVerdadero=False)
-        pregunta1.save()
-        pregunta2 = PreguntaFoV(nombre='test2', numeroDeIntentos=1, marca=marca,
-                                pregunta="¿Django es un framework para apps móviles?", esVerdadero=False)
-        pregunta2.save()
-        url = "/activities/pregunta_f_v"
-        response = self.client.get(url, formal='json')
-        current_data = json.loads(response.content)
-        self.assertEqual(len(current_data), 2)
+class PreguntaFoVTestCase(TestCase):    
 
     def test_create_question(self):
         marca = escenario()
-        url = "/activities/pregunta_f_v"
+        url = "/activities/pregunta_f_v/create"
         response = self.client.post(url, {
             "nombre": "test",
             "numeroDeIntentos": 1,
@@ -159,10 +147,10 @@ class PreguntaFoVTestCase(TestCase):
         pregunta4.save()
 
         url = "/activities/pregunta_f_v/" + str(marca.pk) + "/"
-        response = self.client.get(url, formal='json')
-        #current_data = json.loads(response.content)
+        print(url)
+        response = self.client.get(url, formal='json')        
         self.assertEqual(response.status_code, 200)
-        #self.assertEqual(len(current_data), 3)
+        
 
 
 class RespuestaSeleccionTestCase(TestCase):

@@ -15,5 +15,6 @@ urlpatterns = [
     path('generate-question-multiple-choice', CreatePreguntaSeleccionMultiple.as_view(), name='pregunta seleccion multiple '),
     path('marca', MarcaApi.as_view(), name='marca'),
     path('ultimo_intento', intentos_max),
-    path('pregunta_f_v', PreguntaFoVView.as_view(), name='preguntasFoV')
+    path('pregunta_f_v/<int:marca>/', PreguntaFoVView.as_view(), name='preguntasFoV'),
+    path('pregunta_f_v/create', PreguntaFoVView.as_view(), name='preguntasFoV')
 ]

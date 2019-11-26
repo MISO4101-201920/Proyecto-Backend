@@ -128,11 +128,12 @@ class CreatePreguntaSeleccionMultiple(APIView):
         return Response(data=PreguntaOpcionMultipleSerializer(question).data)
 
 
-class PreguntaFoVView(APIView):    
-    def get(self, request):
-        questions = PreguntaFoV.objects.all()
+class PreguntaFoVView(APIView):
+    def get(self, request, *args, **kwargs):
+        marca = self.kwargs.get('marca', None)
+        questions = PreguntaFoV.objects.filter(marca=marca)
         serializer = PreguntaFoVSerializer(questions, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
         serializer = PreguntaFoVSerializer(data=request.data)
