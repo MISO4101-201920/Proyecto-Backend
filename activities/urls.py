@@ -1,6 +1,6 @@
 from activities.views import *
 from django.urls import path
-from activities.views import CalificarAPI, MarcaApi, intentos_max, preguntaFoVview
+from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVView
 app_name = 'activities'
 
 
@@ -15,5 +15,5 @@ urlpatterns = [
     path('generate-question-multiple-choice', CreatePreguntaSeleccionMultiple.as_view(), name='pregunta seleccion multiple '),
     path('marca', MarcaApi.as_view(), name='marca'),
     path('ultimo_intento', intentos_max),
-    path('pregunta_f_v', preguntaFoVview)
+    path('pregunta_f_v', PreguntaFoVView.as_view(), name='preguntasFoV')
 ]
