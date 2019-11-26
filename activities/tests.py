@@ -123,11 +123,21 @@ class PreguntaFoVTestCase(TestCase):
         pregunta2.save()
         url = "/activities/pregunta_f_v"
         response = self.client.get(url, formal='json')
-        current_data = json.loads(response.content)
-        print('*' * 70)
-        print(current_data)
+        current_data = json.loads(response.content)        
         self.assertEqual(len(current_data), 2)
-
+    
+    def test_create_question(self):
+        marca = escenario()
+        url = "/activities/pregunta_f_v"
+        response = self.client.post(url, {
+            "nombre": "test",
+            "numeroDeIntentos":1,
+            "marca":marca,
+            "pregunta": "¿Bogotá es la capital de Colombia?",
+            "esVerdadero": True
+        })
+        
+        self.assertEqual(response.status_code, 201)
 
 
 class RespuestaSeleccionTestCase(TestCase):
