@@ -114,6 +114,12 @@ class PreguntaTestCase(TestCase):
         print(response.context)
         self.assertEqual(response.status_code, 200)
 
+class PreguntaFoVTestCase(TestCase):
+    def test_get_question(self):
+        url = "/activities/pregunta_f_v"
+        response = self.client.get(url, formal='json')
+        self.assertEqual(response.status_code, 200)
+
 
 class RespuestaSeleccionTestCase(TestCase):
     def test_guardar_Respuesta(self):
