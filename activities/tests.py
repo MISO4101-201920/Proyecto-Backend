@@ -7,7 +7,7 @@ from rest_framework.utils import json
 from django.contrib.auth.models import User, AbstractUser
 
 from interactive_content.models import ContenidoInteractivo, Contenido, Curso, Grupo
-from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, RespuestmultipleEstudiante, PreguntaFoV
+from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, RespuestmultipleEstudiante, PreguntaFoV, Pausa
 from users.models import Profesor, Estudiante
 
 
@@ -115,7 +115,7 @@ class PreguntaTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class PreguntaFoVTestCase(TestCase):    
+class PreguntaFoVTestCase(TestCase):
 
     def test_create_question(self):
         marca = escenario()
@@ -129,7 +129,7 @@ class PreguntaFoVTestCase(TestCase):
         })
 
         self.assertEqual(response.status_code, 201)
-    
+
     def test_filter_question(self):
         marca = escenario()
         marca2 = escenario()
@@ -143,14 +143,19 @@ class PreguntaFoVTestCase(TestCase):
                                 pregunta="¿Django es un framework para apps móviles?", esVerdadero=False)
         pregunta3.save()
         pregunta4 = PreguntaFoV(nombre='test2', numeroDeIntentos=1, marca=marca2,
-                               pregunta="¿Django es un framework para apps móviles?", esVerdadero=False)
+                                pregunta="¿Django es un framework para apps móviles?", esVerdadero=False)
         pregunta4.save()
 
-        url = "/activities/pregunta_f_v/" + str(marca.pk) + "/"
-        print(url)
-        response = self.client.get(url, formal='json')        
+        url = "/activities/pregunta_f_v/" + str(marca.pk) + "/"        
+        response = self.client.get(url, formal='json')
         self.assertEqual(response.status_code, 200)
-        
+
+
+class GetPauseTestCase(TestCase):
+    def test_get_pause(self):
+        url = '/activities/pausas'
+        response = self.client.get(url, formal='json')
+        self.assertEqual(response.status_code, 200)
 
 
 class RespuestaSeleccionTestCase(TestCase):
