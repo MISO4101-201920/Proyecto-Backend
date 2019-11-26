@@ -1,6 +1,6 @@
 from activities.views import *
 from django.urls import path
-from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVView
+from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVView, get_pause
 app_name = 'activities'
 
 
@@ -16,5 +16,6 @@ urlpatterns = [
     path('marca', MarcaApi.as_view(), name='marca'),
     path('ultimo_intento', intentos_max),
     path('pregunta_f_v/<int:marca>/', PreguntaFoVView.as_view(), name='preguntasFoV'),
-    path('pregunta_f_v/create', PreguntaFoVView.as_view(), name='preguntasFoV')
+    path('pregunta_f_v/create', PreguntaFoVView.as_view(), name='preguntasFoV'),
+    path('pausas', get_pause)
 ]
