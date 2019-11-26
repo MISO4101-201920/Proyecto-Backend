@@ -113,7 +113,8 @@ class CreatePreguntaSeleccionMultiple(APIView):
             Opcionmultiple.objects.create(preguntaSeleccionMultiple=question, **option)
         return Response(data=PreguntaOpcionMultipleSerializer(question).data)
 
-
+def preguntaFoVview(request):
+    return JsonResponse({'resp':'OK'})
 class DetailPreguntaSeleccionMultiple(generics.RetrieveUpdateDestroyAPIView, ListModelMixin):
     serializer_class = PreguntaOpcionMultipleSerializer
     lookup_url_kwarg = "marca"
