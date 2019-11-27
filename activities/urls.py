@@ -26,3 +26,4 @@ urlpatterns = [
     path('pregunta_abierta', GetPreguntaAbierta.as_view(), name="pregunta abierta"),
     path('create-pausa/', PausaDetail.as_view(), name="create pauses")
 ]
+
