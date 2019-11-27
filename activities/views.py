@@ -146,9 +146,10 @@ class PreguntaFoVView(APIView):
 
 class GetPausesView(APIView):
     def get(self, request, *args, **kwargs):
-        pauses = Pausa.objects.all()
+        marca = self.kwargs.get('marca', None)
+        pauses = Pausa.objects.filter(marca=marca)
         serializer = PausaSerializer(pauses, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
             
 
 

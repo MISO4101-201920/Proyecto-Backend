@@ -17,5 +17,5 @@ urlpatterns = [
     path('ultimo_intento', intentos_max),
     path('pregunta_f_v/<int:marca>/', PreguntaFoVView.as_view(), name='preguntasFoV'),
     path('pregunta_f_v/create', PreguntaFoVView.as_view(), name='preguntasFoV'),
-    path('pausas', GetPausesView.as_view(), name="get pauses")
+    path('pausas/<int:marca>/', GetPausesView.as_view(), name="get pauses")
 ]
