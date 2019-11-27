@@ -300,4 +300,5 @@ def intentos_max(request):
 class PausaDetail(RetrieveUpdateDestroyAPIView):
     queryset = Pausa.objects.all()
     serializer_class = PausaSerializer
-    authentication_classes = (TokenAuthentication, IsProfesor)
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = (IsAuthenticated, IsProfesor)
