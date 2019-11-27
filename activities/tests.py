@@ -3,12 +3,14 @@ from django.utils.timezone import make_aware
 from datetime import datetime
 import json
 from django.http import JsonResponse
+from rest_framework.test import APIClient
 from rest_framework.utils import json
 from django.contrib.auth.models import User, AbstractUser
 
 from interactive_content.models import ContenidoInteractivo, Contenido, Curso, Grupo
 from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, RespuestmultipleEstudiante, PreguntaFoV, Pausa
 from users.models import Profesor, Estudiante
+from rest_framework.authtoken.models import Token
 
 
 # Create your tests here.
@@ -151,7 +153,15 @@ class PreguntaFoVTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class GetPauseTestCase(TestCase):
+class PauseTestCase(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user_profesor = Profesor.objects.create_superuser('admin', 'admin@admin.com', 'admin123')
+        self.token = Token.objects.create(user=self.user_profesor)
+        self.estudiante = Estudiante.objects.create_user('estudiante', 'estudiante@admin.com', 'estudiante123')
+        self.token_estudiante = Token.objects.create(user=self.estudiante)
+
     def test_get_pause(self):
         marca = escenario()
         marca2 = escenario()
@@ -169,6 +179,35 @@ class GetPauseTestCase(TestCase):
         current_data = json.loads(response.content)
 
         self.assertEqual(len(current_data), 1)
+
+    def test_pause_creation_by_profesor(self):
+        marca = escenario()
+        url = '/activities/create-pausa/'
+        actividad_dict = dict(nombre='prueba 1',
+                              numeroDeIntentos=1,
+                              tieneRetroalimentacion=True,
+                              marca=marca,
+                              retroalimentacion='',)
+        response = self.client.post(url, actividad_dict, format='json',
+                                    HTTP_AUTHORIZATION='Token ' + self.token.key)
+        self.assertEqual(response.status_code, 201)
+        current_data = json.loads(response.content)
+        self.assertEqual(current_data['name'], 'prueba 1')
+
+
+    def test_pause_creation_by_estudiante(self):
+        marca = escenario()
+        url = '/activities/create-pausa/'
+        actividad_dict = dict(nombre='prueba 1',
+                              numeroDeIntentos=1,
+                              tieneRetroalimentacion=True,
+                              marca=marca,
+                              retroalimentacion='', )
+        response = self.client.post(url, actividad_dict, format='json',
+                                    HTTP_AUTHORIZATION='Token ' + self.token_estudiante.key)
+        current_data = json.loads(response.content)
+        self.assertEqual(current_data['message'], 'Unauthorized')
+        self.assertEqual(response.status_code, 401)
 
 
 class RespuestaSeleccionTestCase(TestCase):

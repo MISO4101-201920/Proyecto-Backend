@@ -47,6 +47,7 @@ class PreguntaFoVSerializer(serializers.ModelSerializer):
         model = PreguntaFoV
         fields = '__all__'
 
+
 class PausaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pausa

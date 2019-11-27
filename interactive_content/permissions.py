@@ -9,3 +9,10 @@ class ProfesorOwnsInteractiveContent(permissions.BasePermission):
             return obj.contenido.profesor == user_with_roll
         else:
             return False
+
+
+class IsProfesor(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        user = request.user
+        user_with_roll = user.get_real_instance()
+        return user_with_roll.__class__.__name__ == 'Profesor'

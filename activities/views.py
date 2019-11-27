@@ -13,6 +13,7 @@ from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 
+from interactive_content.permissions import IsProfesor
 from users.models import Profesor
 from interactive_content.models import ContenidoInteractivo
 from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, RespuestaSeleccionMultipleSerializer, MarcaSerializer,\
@@ -281,3 +282,9 @@ def intentos_max(request):
 
         print(max_int)
         return JsonResponse({'ultimo_intento': max_int}, status=status.HTTP_200_OK)
+
+
+class PausaDetail(RetrieveUpdateDestroyAPIView):
+    queryset = Pausa.objects.all()
+    serializer_class = PausaSerializer
+    authentication_classes = (TokenAuthentication, IsProfesor)
