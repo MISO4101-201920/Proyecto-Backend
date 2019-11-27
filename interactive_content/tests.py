@@ -19,9 +19,9 @@ class CreateInteractiveContentTestCase(TestCase):
 
     def test_add_interactive_content(self):
         url = '/content/cont_interactivo'
-        interactive_content = {"nombre": "test", "contenido": "1"}
         self.client.force_login(user=self.user)
         contenido = Contenido.objects.create(url="test.com", nombre="contenido test", profesor_id=self.user.id)
+        interactive_content = {"nombre": "test", "contenido": contenido.id}
         response = self.client.post(url, interactive_content, format='json',
                                     HTTP_AUTHORIZATION='Token ' + self.token.key)
         current_data = json.loads(response.content)
@@ -53,9 +53,9 @@ class InteractiveContentTestCase(TestCase):
 
     def test_add_interactive_content(self):
         url = '/content/cont_interactivo'
-        interactive_content = {"nombre": "test", "contenido": "1"}
         self.client.force_login(user=self.user)
         contenido = Contenido.objects.create(url="test.com", nombre="contenido test", profesor_id=self.user.id)
+        interactive_content = {"nombre": "test", "contenido": contenido.id}
         response = self.client.post(url, interactive_content, format='json',
                                     HTTP_AUTHORIZATION='Token ' + self.token.key)
         current_data = json.loads(response.content)
@@ -130,7 +130,7 @@ class InteractiveContentTestCase(TestCase):
                                    HTTP_AUTHORIZATION='Token ' + self.token.key)
         data = json.loads(response.content)
 
-        self.assertEqual(data['marcas'][0]['id'], 1)
+        self.assertEqual(data['marcas'][0]['id'], marca1.id)
         self.assertEqual(data['marcas'][0]['punto'], marca1.punto)
-        self.assertEqual(data['marcas'][1]['id'], 2)
+        self.assertEqual(data['marcas'][1]['id'], marca2.id)
         self.assertEqual(data['marcas'][1]['punto'], marca2.punto)

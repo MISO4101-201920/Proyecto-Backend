@@ -15,9 +15,11 @@ from django.views.decorators.csrf import csrf_exempt
 
 from users.models import Profesor
 from interactive_content.models import ContenidoInteractivo
-from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, RespuestaSeleccionMultipleSerializer, MarcaSerializer
-from activities.models import Calificacion,  Marca, Actividad, RespuestmultipleEstudiante,\
-    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta
+from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, \
+    RespuestaSeleccionMultipleSerializer, MarcaSerializer, PreguntaAbiertaSerializer
+from activities.models import Calificacion, Marca, Actividad, RespuestmultipleEstudiante, \
+    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta, PreguntaAbierta
+
 
 # Create your views here.
 @api_view(['GET'])
@@ -98,15 +100,29 @@ class MarcaView(ListModelMixin, CreateModelMixin, GenericAPIView):
         return self.create(request, *args, **kwargs)
 
 
+def createOrGetMarca(question_data):
+    marca_id = question_data.pop('marca_id', None)
+    marca = None
+    if not marca_id:
+        interactive_content = ContenidoInteractivo.objects.get(id=question_data['marca'].pop('contenido_id'))
+        marca = Marca.objects.create(contenido=interactive_content, **question_data.pop('marca'))
+    else:
+        marca = Marca.objects.get(pk=marca_id)
+    return marca
+
+
+class CreatePreguntaAbierta(APIView):
+    def post(self, request, *args, **kwargs):
+        question_data = request.data
+        marca = createOrGetMarca(question_data)
+        question = PreguntaAbierta.objects.create(marca=marca, **question_data)
+        return Response(data=PreguntaAbiertaSerializer(question).data)
+
+
 class CreatePreguntaSeleccionMultiple(APIView):
     def post(self, request, *args, **kwargs):
         question_data = request.data
-        marca_id = question_data.pop('marca_id', None)
-        if not marca_id:
-            interactive_content = ContenidoInteractivo.objects.get(id=question_data['marca'].pop('contenido_id'))
-            marca = Marca.objects.create(contenido=interactive_content, **question_data.pop('marca'))
-        else:
-            marca = Marca.objects.get(pk=marca_id)
+        marca = createOrGetMarca(question_data)
         options = question_data.pop('opciones')
         question = PreguntaOpcionMultiple.objects.create(marca=marca, **question_data)
         for option in options:
