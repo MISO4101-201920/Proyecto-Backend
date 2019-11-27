@@ -4,9 +4,6 @@ from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVVi
     MarcaView, reports, RespuestaSeleccionMultipleView, CreatePreguntaSeleccionMultiple, PausaDetail
 
 app_name = 'activities'
-
-
-app_name = 'marca'
 # add url path to the API
 urlpatterns = [
     path('marca', MarcaView.as_view(), name='marca'),
