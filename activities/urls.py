@@ -1,6 +1,6 @@
 from activities.views import *
 from django.urls import path
-from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVView, GetPausesView, get_pregunta_abierta
+from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVView, GetPausesView, GetPreguntaAbierta
 app_name = 'activities'
 
 
@@ -21,6 +21,5 @@ urlpatterns = [
          PreguntaFoVView.as_view(), name='preguntasFoV'),
     path('pregunta_f_v/create', PreguntaFoVView.as_view(), name='preguntasFoV'),
     path('pausas/<int:marca>/', GetPausesView.as_view(), name="get pauses"),
-    path('pregunta_abierta', get_pregunta_abierta, name="pregunta abierta"),
-
+    path('pregunta_abierta', GetPreguntaAbierta.as_view(), name="pregunta abierta"),
 ]

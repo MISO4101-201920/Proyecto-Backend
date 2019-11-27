@@ -16,9 +16,9 @@ from django.views.decorators.csrf import csrf_exempt
 from users.models import Profesor
 from interactive_content.models import ContenidoInteractivo
 from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, RespuestaSeleccionMultipleSerializer, MarcaSerializer,\
-    PreguntaFoVSerializer, PausaSerializer
+    PreguntaFoVSerializer, PausaSerializer, PreguntaAbiertaSerializer
 from activities.models import Calificacion,  Marca, Actividad, RespuestmultipleEstudiante,\
-    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta, Pausa
+    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta, Pausa, PreguntaAbierta
 
 # Create your views here.
 @api_view(['GET'])
@@ -151,8 +151,13 @@ class GetPausesView(APIView):
         serializer = PausaSerializer(pauses, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-def get_pregunta_abierta(request):
-    return JsonResponse({"resp":"OK"}, status=status.HTTP_200_OK)
+
+class GetPreguntaAbierta(APIView):
+    def get(self, request, *args, **kwargs):
+        questions = PreguntaAbierta.objects.all()
+        serializer = PreguntaAbiertaSerializer(questions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class DetailPreguntaSeleccionMultiple(generics.RetrieveUpdateDestroyAPIView, ListModelMixin):
     serializer_class = PreguntaOpcionMultipleSerializer
