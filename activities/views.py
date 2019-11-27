@@ -134,7 +134,7 @@ class PreguntaFoVView(APIView):
         questions = PreguntaFoV.objects.filter(marca=marca)
         serializer = PreguntaFoVSerializer(questions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     def post(self, request):
         serializer = PreguntaFoVSerializer(data=request.data)
         if serializer.is_valid():
@@ -150,8 +150,9 @@ class GetPausesView(APIView):
         pauses = Pausa.objects.filter(marca=marca)
         serializer = PausaSerializer(pauses, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-            
 
+def get_pregunta_abierta(request):
+    return JsonResponse({"resp":"OK"}, status=status.HTTP_200_OK)
 
 class DetailPreguntaSeleccionMultiple(generics.RetrieveUpdateDestroyAPIView, ListModelMixin):
     serializer_class = PreguntaOpcionMultipleSerializer
