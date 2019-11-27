@@ -1,17 +1,14 @@
-from rest_framework import status, generics, serializers
+from rest_framework import status, generics
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.generics import GenericAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
+from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.utils import json
 from rest_framework.views import APIView
 
 from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
 
 from interactive_content.permissions import IsProfesor
 from users.models import Profesor
@@ -21,12 +18,12 @@ from activities.serializers import PreguntaOpcionMultipleSerializer, Calificacio
 from activities.models import Calificacion,  Marca, Actividad, RespuestmultipleEstudiante,\
     Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta, Pausa, PreguntaAbierta
 
+
 # Create your views here.
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def reports(request, contentpk):
-
     # Get correct professor through token or session
     try:
         get_the_professor = Profesor.objects.get(id=request.user.id)
@@ -48,21 +45,18 @@ def reports(request, contentpk):
     for marca in marcas:
 
         big_json['marcas'].append({'nombre': marca.nombre, 'preguntas': []})
-        preguntas_multiples = PreguntaOpcionMultiple.objects.filter(
-            marca=marca)
+        preguntas_multiples = PreguntaOpcionMultiple.objects.filter(marca=marca)
         preguntas_vof = PreguntaFoV.objects.filter(marca=marca)
 
         for pregunta in preguntas_multiples:
             if isinstance(pregunta, PreguntaOpcionMultiple):
                 big_json['marcas'][-1]['preguntas'].append(
                     {'pregunta': pregunta.enunciado, 'tipo': 'multiple', 'total_respuestas': 0, 'opciones': []})
-                opciones = Opcionmultiple.objects.filter(
-                    preguntaSeleccionMultiple=pregunta)
+                opciones = Opcionmultiple.objects.filter(preguntaSeleccionMultiple=pregunta)
 
                 cont = 0
                 for opcion in opciones:
-                    votos = RespuestmultipleEstudiante.objects.filter(
-                        respuestmultiple=opcion).count()
+                    votos = RespuestmultipleEstudiante.objects.filter(respuestmultiple=opcion).count()
                     cont += votos
                     big_json['marcas'][-1]['preguntas'][-1]['opciones'].append(
                         {'respuesta': opcion.opcion, 'esCorrecta': opcion.esCorrecta, 'votos': votos})
@@ -70,12 +64,13 @@ def reports(request, contentpk):
 
         for pregunta in preguntas_vof:
             if isinstance(pregunta, PreguntaFoV):
-                big_json['marcas'][-1]['preguntas'].append({'pregunta': pregunta.pregunta, 'esCorrecta': pregunta.esVerdadero,
-                                                            'tipo': 'verdadero/falso', 'total_verdadero': 0, 'total_falso': 0, 'total_respuestas': 0})
-                howManyTrue = RespuestaVoF.objects.filter(
-                    preguntaVoF=pregunta, esVerdadero=True).count()  # "howTrue":value
-                howManyFalse = RespuestaVoF.objects.filter(
-                    preguntaVoF=pregunta, esVerdadero=False).count()  # "howFalse":value
+                big_json['marcas'][-1]['preguntas'].append(
+                    {'pregunta': pregunta.pregunta, 'esCorrecta': pregunta.esVerdadero,
+                     'tipo': 'verdadero/falso', 'total_verdadero': 0, 'total_falso': 0, 'total_respuestas': 0})
+                howManyTrue = RespuestaVoF.objects.filter(preguntaVoF=pregunta,
+                                                          esVerdadero=True).count()  # "howTrue":value
+                howManyFalse = RespuestaVoF.objects.filter(preguntaVoF=pregunta,
+                                                           esVerdadero=False).count()  # "howFalse":value
                 total_vf = howManyTrue + howManyFalse
                 big_json['marcas'][-1]['preguntas'][-1]['total_verdadero'] = howManyTrue
                 big_json['marcas'][-1]['preguntas'][-1]['total_falso'] = howManyFalse
@@ -109,17 +104,29 @@ class MarcaView(ListModelMixin, CreateModelMixin, GenericAPIView):
         return self.create(request, *args, **kwargs)
 
 
+def createOrGetMarca(question_data):
+    marca_id = question_data.pop('marca_id', None)
+    marca = None
+    if not marca_id:
+        interactive_content = ContenidoInteractivo.objects.get(id=question_data['marca'].pop('contenido_id'))
+        marca = Marca.objects.create(contenido=interactive_content, **question_data.pop('marca'))
+    else:
+        marca = Marca.objects.get(pk=marca_id)
+    return marca
+
+
+class CreatePreguntaAbierta(APIView):
+    def post(self, request, *args, **kwargs):
+        question_data = request.data
+        marca = createOrGetMarca(question_data)
+        question = PreguntaAbierta.objects.create(marca=marca, **question_data)
+        return Response(data=PreguntaAbiertaSerializer(question).data)
+
+
 class CreatePreguntaSeleccionMultiple(APIView):
     def post(self, request, *args, **kwargs):
         question_data = request.data
-        marca_id = question_data.pop('marca_id', None)
-        if not marca_id:
-            interactive_content = ContenidoInteractivo.objects.get(
-                id=question_data['marca'].pop('contenido_id'))
-            marca = Marca.objects.create(
-                contenido=interactive_content, **question_data.pop('marca'))
-        else:
-            marca = Marca.objects.get(pk=marca_id)
+        marca = createOrGetMarca(question_data)
         options = question_data.pop('opciones')
         question = PreguntaOpcionMultiple.objects.create(
             marca=marca, **question_data)
@@ -212,7 +219,7 @@ class RespuestaSeleccionMultipleView(ListModelMixin, CreateModelMixin, GenericAP
         return self.create(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
-         # Validacion de respuesta en blanco (null)
+        # Validacion de respuesta en blanco (null)
         if self.request.data['respuestmultiple']:
             opcion = Opcionmultiple.objects.filter(
                 id=self.request.data['respuestmultiple'])

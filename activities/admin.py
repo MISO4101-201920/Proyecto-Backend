@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, PreguntaFoV, PreguntaAbierta, RespuestmultipleEstudiante, RespuestaVoF, RespuestaAbiertaEstudiante, Calificacion
+from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, PreguntaFoV, PreguntaAbierta, \
+    RespuestmultipleEstudiante, RespuestaVoF, RespuestaAbiertaEstudiante, Calificacion
 
 # Register your models here.
 
