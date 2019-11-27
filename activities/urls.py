@@ -2,7 +2,7 @@
 from django.urls import path
 from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVView, GetPausesView, GetPreguntaAbierta, \
     MarcaView, reports, RespuestaSeleccionMultipleView, CreatePreguntaSeleccionMultiple, PausaDetail, \
-    CreatePreguntaAbierta
+    CreatePreguntaAbierta, DetailPreguntaSeleccionMultiple
 
 app_name = 'activities'
 # add url path to the API

@@ -178,7 +178,8 @@ class PauseTestCase(TestCase):
         self.client = APIClient()
         self.user_profesor = Profesor.objects.create_superuser('admin', 'admin@admin.com', 'admin123')
         self.token = Token.objects.create(user=self.user_profesor)
-        self.estudiante = Estudiante.objects.create_user('estudiante', 'estudiante@admin.com', 'estudiante123')
+        self.estudiante = Estudiante.objects.create_user('estudiante', 'estudiante@admin.com', 'estudiante123',
+                                                         codigo_de_estudiante='1232142')
         self.token_estudiante = Token.objects.create(user=self.estudiante)
 
     def test_get_pause(self):
@@ -206,13 +207,16 @@ class PauseTestCase(TestCase):
         actividad_dict = dict(nombre='prueba 1',
                               numeroDeIntentos=1,
                               tieneRetroalimentacion=True,
-                              marca=marca,
-                              retroalimentacion='',)
+                              marca=marca.id,
+                              retroalimentacion='',
+                              enunciado='Este es el enunciado de la pausa',
+                              tiempo=5.0
+                              )
         response = self.client.post(url, actividad_dict, format='json',
                                     HTTP_AUTHORIZATION='Token ' + self.token.key)
         self.assertEqual(response.status_code, 201)
         current_data = json.loads(response.content)
-        self.assertEqual(current_data['name'], 'prueba 1')
+        self.assertEqual(current_data['nombre'], 'prueba 1')
 
 
     def test_pause_creation_by_estudiante(self):
@@ -221,13 +225,16 @@ class PauseTestCase(TestCase):
         actividad_dict = dict(nombre='prueba 1',
                               numeroDeIntentos=1,
                               tieneRetroalimentacion=True,
-                              marca=marca,
-                              retroalimentacion='', )
+                              marca=marca.id,
+                              retroalimentacion='',
+                              enunciado='Este es el enunciado de la pausa',
+                              tiempo=5.0
+                              )
         response = self.client.post(url, actividad_dict, format='json',
                                     HTTP_AUTHORIZATION='Token ' + self.token_estudiante.key)
         current_data = json.loads(response.content)
-        self.assertEqual(current_data['message'], 'Unauthorized')
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(current_data['detail'], 'You do not have permission to perform this action.')
+        self.assertEqual(response.status_code, 403)
 
 
 class GetPreguntaAbiertaTest(TestCase):

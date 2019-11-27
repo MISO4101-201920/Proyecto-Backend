@@ -12,7 +12,7 @@ class ProfesorOwnsInteractiveContent(permissions.BasePermission):
 
 
 class IsProfesor(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         user = request.user
         user_with_roll = user.get_real_instance()
         return user_with_roll.__class__.__name__ == 'Profesor'

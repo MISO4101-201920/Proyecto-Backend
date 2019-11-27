@@ -297,8 +297,8 @@ def intentos_max(request):
         return JsonResponse({'ultimo_intento': max_int}, status=status.HTTP_200_OK)
 
 
-class PausaDetail(RetrieveUpdateDestroyAPIView):
+class PausaDetail(ListCreateAPIView):
     queryset = Pausa.objects.all()
     serializer_class = PausaSerializer
     authentication_classes = (TokenAuthentication, )
-    permission_classes = (IsAuthenticated, IsProfesor)
+    permission_classes = [IsAuthenticated, IsProfesor]
