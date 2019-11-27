@@ -1,13 +1,15 @@
 import json
 from rest_framework.test import APIClient
-from django.test import TestCase, Client
-from .models import Contenido, ContenidoInteractivo, Curso
+from django.test import TestCase
+from .models import ContenidoInteractivo, Curso
 from datetime import datetime
 
 from interactive_content.models import Contenido
 from users.models import Profesor, Estudiante
 from rest_framework.authtoken.models import Token
 from activities.models import Marca
+
+
 # Create your tests here.
 # Create your tests here.
 class CreateInteractiveContentTestCase(TestCase):
@@ -100,10 +102,13 @@ class InteractiveContentTestCase(TestCase):
 
     def test_get_courses_from_interactive_content(self):
         content = Contenido.objects.create(url="youtube.com", nombre="Mi primer contenido", profesor=self.user)
-        interactive_content = ContenidoInteractivo.objects.create(contenido=content, fecha_creacion=datetime.now(), tiene_retroalimentacion=True)
+        interactive_content = ContenidoInteractivo.objects.create(contenido=content, fecha_creacion=datetime.now(),
+                                                                  tiene_retroalimentacion=True)
 
-        curso1 = Curso.objects.create(fecha_creacion=datetime.now(), nombre="Mi primer curso", profesor=self.user, descripcion="Breve descripcion 1")
-        curso2 = Curso.objects.create(fecha_creacion=datetime.now(), nombre="Mi segundo curso", profesor=self.user, descripcion="Breve descripcion 2")
+        curso1 = Curso.objects.create(fecha_creacion=datetime.now(), nombre="Mi primer curso", profesor=self.user,
+                                      descripcion="Breve descripcion 1")
+        curso2 = Curso.objects.create(fecha_creacion=datetime.now(), nombre="Mi segundo curso", profesor=self.user,
+                                      descripcion="Breve descripcion 2")
 
         interactive_content = ContenidoInteractivo.objects.create(contenido=content, fecha_creacion=datetime.now(),
                                                                   tiene_retroalimentacion=True)
@@ -121,7 +126,8 @@ class InteractiveContentTestCase(TestCase):
 
     def test_get_marcas_from_interactive_content(self):
         content = Contenido.objects.create(url="youtube.com", nombre="Mi primer contenido", profesor=self.user)
-        interactive_content = ContenidoInteractivo.objects.create(contenido=content, fecha_creacion=datetime.now(), tiene_retroalimentacion=True)
+        interactive_content = ContenidoInteractivo.objects.create(contenido=content, fecha_creacion=datetime.now(),
+                                                                  tiene_retroalimentacion=True)
 
         marca1 = Marca.objects.create(nombre="Marca 1", punto=100, contenido=interactive_content)
         marca2 = Marca.objects.create(nombre="Marca 2", punto=200, contenido=interactive_content)

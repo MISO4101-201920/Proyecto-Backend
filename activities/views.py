@@ -1,17 +1,14 @@
-from rest_framework import status, generics, serializers
+from rest_framework import status, generics
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.generics import GenericAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
+from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.utils import json
 from rest_framework.views import APIView
 
 from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
 
 from users.models import Profesor
 from interactive_content.models import ContenidoInteractivo
@@ -26,8 +23,7 @@ from activities.models import Calificacion, Marca, Actividad, RespuestmultipleEs
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def reports(request, contentpk):
-
-    #Get correct professor through token or session
+    # Get correct professor through token or session
     try:
         get_the_professor = Profesor.objects.get(id=request.user.id)
     except:
@@ -46,27 +42,33 @@ def reports(request, contentpk):
     marcas = Marca.objects.filter(contenido__contenido__profesor=get_the_professor, contenido_id=contentpk)
     for marca in marcas:
 
-        big_json['marcas'].append({'nombre':marca.nombre,'preguntas':[]})
+        big_json['marcas'].append({'nombre': marca.nombre, 'preguntas': []})
         preguntas_multiples = PreguntaOpcionMultiple.objects.filter(marca=marca)
         preguntas_vof = PreguntaFoV.objects.filter(marca=marca)
-        
+
         for pregunta in preguntas_multiples:
             if isinstance(pregunta, PreguntaOpcionMultiple):
-                big_json['marcas'][-1]['preguntas'].append({'pregunta':pregunta.enunciado, 'tipo':'multiple', 'total_respuestas':0,'opciones':[]})
+                big_json['marcas'][-1]['preguntas'].append(
+                    {'pregunta': pregunta.enunciado, 'tipo': 'multiple', 'total_respuestas': 0, 'opciones': []})
                 opciones = Opcionmultiple.objects.filter(preguntaSeleccionMultiple=pregunta)
-                
+
                 cont = 0
                 for opcion in opciones:
                     votos = RespuestmultipleEstudiante.objects.filter(respuestmultiple=opcion).count()
-                    cont+=votos
-                    big_json['marcas'][-1]['preguntas'][-1]['opciones'].append({'respuesta':opcion.opcion, 'esCorrecta': opcion.esCorrecta, 'votos':votos})
+                    cont += votos
+                    big_json['marcas'][-1]['preguntas'][-1]['opciones'].append(
+                        {'respuesta': opcion.opcion, 'esCorrecta': opcion.esCorrecta, 'votos': votos})
                 big_json['marcas'][-1]['preguntas'][-1]['total_respuestas'] = cont
 
         for pregunta in preguntas_vof:
             if isinstance(pregunta, PreguntaFoV):
-                big_json['marcas'][-1]['preguntas'].append({'pregunta':pregunta.pregunta, 'esCorrecta':pregunta.esVerdadero, 'tipo':'verdadero/falso', 'total_verdadero':0, 'total_falso':0, 'total_respuestas':0})
-                howManyTrue = RespuestaVoF.objects.filter(preguntaVoF=pregunta, esVerdadero=True).count() #"howTrue":value
-                howManyFalse = RespuestaVoF.objects.filter(preguntaVoF=pregunta, esVerdadero=False).count() #"howFalse":value
+                big_json['marcas'][-1]['preguntas'].append(
+                    {'pregunta': pregunta.pregunta, 'esCorrecta': pregunta.esVerdadero,
+                     'tipo': 'verdadero/falso', 'total_verdadero': 0, 'total_falso': 0, 'total_respuestas': 0})
+                howManyTrue = RespuestaVoF.objects.filter(preguntaVoF=pregunta,
+                                                          esVerdadero=True).count()  # "howTrue":value
+                howManyFalse = RespuestaVoF.objects.filter(preguntaVoF=pregunta,
+                                                           esVerdadero=False).count()  # "howFalse":value
                 total_vf = howManyTrue + howManyFalse
                 big_json['marcas'][-1]['preguntas'][-1]['total_verdadero'] = howManyTrue
                 big_json['marcas'][-1]['preguntas'][-1]['total_falso'] = howManyFalse
@@ -182,7 +184,7 @@ class RespuestaSeleccionMultipleView(ListModelMixin, CreateModelMixin, GenericAP
         return self.create(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
-         # Validacion de respuesta en blanco (null)
+        # Validacion de respuesta en blanco (null)
         if self.request.data['respuestmultiple']:
             opcion = Opcionmultiple.objects.filter(
                 id=self.request.data['respuestmultiple'])
@@ -221,9 +223,6 @@ class CalificarAPI(ListCreateAPIView):
             return Calificacion.objects.filter(actividad=activity)
         else:
             return Calificacion.objects.filter(actividad=None)
-        
-        
-            
 
 
 class MarcaApi(ListModelMixin, GenericAPIView):
@@ -239,8 +238,8 @@ class MarcaApi(ListModelMixin, GenericAPIView):
 
 def intentos_max(request):
     if request.method == 'GET':
-        pregunta = request.GET.get('id_pregunta')        
-        estudiante = request.GET.get('id_estudiante')        
+        pregunta = request.GET.get('id_pregunta')
+        estudiante = request.GET.get('id_estudiante')
         opciones = Opcionmultiple.objects.filter(
             preguntaSeleccionMultiple=pregunta)
 
@@ -256,7 +255,8 @@ def intentos_max(request):
                         resps.append(respuesta.intento)
         if len(resps) > 0:
             max_int = max(resps)
-        else: max_int = 0
+        else:
+            max_int = 0
 
         print(max_int)
         return JsonResponse({'ultimo_intento': max_int}, status=status.HTTP_200_OK)
