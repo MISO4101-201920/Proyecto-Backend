@@ -172,11 +172,21 @@ class GetPauseTestCase(TestCase):
 
         self.assertEqual(len(current_data), 1)
 
+
 class GetPreguntaAbiertaTest(TestCase):
-   def test_consulta_preg_abierta(self):
-       url = '/activities/pregunta_abierta'
-       response = self.client.get(url, formal='json')
-       self.assertEqual(response.status_code, 200)
+    def test_consulta_preg_abierta(self):
+        marca = escenario()
+        pregunta = PreguntaAbierta(
+            nombre='Pregunta abierta', marca=marca, enunciado='¿Que es Django?')
+        pregunta.save()
+        pregunta2 = PreguntaAbierta(
+            nombre='Pregunta abierta', marca=marca, enunciado='¿Que es Django?')
+        pregunta2.save()
+
+        url = '/activities/pregunta_abierta'
+        response = self.client.get(url, formal='json')
+        current_data = json.loads(response.content)
+        self.assertEqual(len(current_data), 2)
 
 
 class RespuestaSeleccionTestCase(TestCase):
