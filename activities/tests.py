@@ -3,7 +3,6 @@ from django.test import TestCase
 from django.utils.timezone import make_aware
 from datetime import datetime
 import json
-from django.http import JsonResponse
 from rest_framework.test import APIClient
 from rest_framework.utils import json
 
