@@ -5,10 +5,9 @@ import json
 from django.http import JsonResponse
 from rest_framework.test import APIClient
 from rest_framework.utils import json
-from django.contrib.auth.models import User, AbstractUser
 
 from interactive_content.models import ContenidoInteractivo, Contenido, Curso, Grupo
-from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, RespuestmultipleEstudiante, PreguntaFoV, Pausa,\
+from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, PreguntaFoV, Pausa,\
     PreguntaAbierta
 from users.models import Profesor, Estudiante
 from rest_framework.authtoken.models import Token

@@ -1,6 +1,8 @@
-from activities.views import *
+
 from django.urls import path
-from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVView, GetPausesView, GetPreguntaAbierta
+from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVView, GetPausesView, GetPreguntaAbierta, \
+    MarcaView, reports, RespuestaSeleccionMultipleView, CreatePreguntaSeleccionMultiple, PausaDetail
+
 app_name = 'activities'
 
 
