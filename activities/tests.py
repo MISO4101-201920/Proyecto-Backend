@@ -8,7 +8,8 @@ from rest_framework.utils import json
 from django.contrib.auth.models import User, AbstractUser
 
 from interactive_content.models import ContenidoInteractivo, Contenido, Curso, Grupo
-from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, RespuestmultipleEstudiante, PreguntaFoV, Pausa
+from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, RespuestmultipleEstudiante, PreguntaFoV, Pausa,\
+    PreguntaAbierta
 from users.models import Profesor, Estudiante
 from rest_framework.authtoken.models import Token
 
@@ -148,7 +149,7 @@ class PreguntaFoVTestCase(TestCase):
                                 pregunta="¿Django es un framework para apps móviles?", esVerdadero=False)
         pregunta4.save()
 
-        url = "/activities/pregunta_f_v/" + str(marca.pk) + "/"        
+        url = "/activities/pregunta_f_v/" + str(marca.pk) + "/"
         response = self.client.get(url, formal='json')
         self.assertEqual(response.status_code, 200)
 
@@ -166,16 +167,17 @@ class PauseTestCase(TestCase):
         marca = escenario()
         marca2 = escenario()
         pausa1 = Pausa(nombre='prueba', marca=marca,
-                    enunciado='Este es el enunciado de la pausa', tiempo=12.0)
+                       enunciado='Este es el enunciado de la pausa', tiempo=12.0)
         pausa1.save()
         pausa2 = Pausa(nombre='prueba2', marca=marca,
-                    enunciado='Este es el enunciado de la pausa', tiempo=7.0)
+                       enunciado='Este es el enunciado de la pausa', tiempo=7.0)
         pausa2.save()
         pausa3 = Pausa(nombre='prueba3', marca=marca2,
-                    enunciado='Este es el enunciado de la pausa', tiempo=5.0)
+                       enunciado='Este es el enunciado de la pausa', tiempo=5.0)
         pausa3.save()
-        url = '/activities/pausas' + str(marca2.pk) + '/'
-        response = self.client.get(url, formal='json')        
+        url = '/activities/pausas/' + str(marca2.pk) + '/'
+        response = self.client.get(url, formal='json')
+        print(response.content)
         current_data = json.loads(response.content)
 
         self.assertEqual(len(current_data), 1)
@@ -208,6 +210,22 @@ class PauseTestCase(TestCase):
         current_data = json.loads(response.content)
         self.assertEqual(current_data['message'], 'Unauthorized')
         self.assertEqual(response.status_code, 401)
+
+
+class GetPreguntaAbiertaTest(TestCase):
+    def test_consulta_preg_abierta(self):
+        marca = escenario()
+        pregunta = PreguntaAbierta(
+            nombre='Pregunta abierta', marca=marca, enunciado='¿Que es Django?')
+        pregunta.save()
+        pregunta2 = PreguntaAbierta(
+            nombre='Pregunta abierta', marca=marca, enunciado='¿Que es Django?')
+        pregunta2.save()
+
+        url = '/activities/pregunta_abierta'
+        response = self.client.get(url, formal='json')
+        current_data = json.loads(response.content)
+        self.assertEqual(len(current_data), 2)
 
 
 class RespuestaSeleccionTestCase(TestCase):
