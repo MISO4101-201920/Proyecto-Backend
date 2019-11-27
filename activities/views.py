@@ -1,7 +1,7 @@
 from rest_framework import status, generics
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.generics import GenericAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -15,8 +15,8 @@ from users.models import Profesor
 from interactive_content.models import ContenidoInteractivo
 from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, RespuestaSeleccionMultipleSerializer, MarcaSerializer,\
     PreguntaFoVSerializer, PausaSerializer, PreguntaAbiertaSerializer
-from activities.models import Calificacion,  Marca, Actividad, RespuestmultipleEstudiante,\
-    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta, Pausa, PreguntaAbierta
+from activities.models import Calificacion,  Marca, RespuestmultipleEstudiante,\
+    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Pausa, PreguntaAbierta
 
 
 # Create your views here.
