@@ -154,7 +154,8 @@ class GetPausesView(APIView):
 
 class GetPreguntaAbierta(APIView):
     def get(self, request, *args, **kwargs):
-        questions = PreguntaAbierta.objects.all()
+        marca = self.kwargs.get('marca', None)
+        questions = PreguntaAbierta.objects.filter(marca=marca)
         serializer = PreguntaAbiertaSerializer(questions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

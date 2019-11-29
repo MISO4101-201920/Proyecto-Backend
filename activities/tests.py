@@ -176,14 +176,17 @@ class GetPauseTestCase(TestCase):
 class GetPreguntaAbiertaTest(TestCase):
     def test_consulta_preg_abierta(self):
         marca = escenario()
+        marca2 = escenario()
         pregunta = PreguntaAbierta(
             nombre='Pregunta abierta', marca=marca, enunciado='¿Que es Django?')
         pregunta.save()
         pregunta2 = PreguntaAbierta(
             nombre='Pregunta abierta', marca=marca, enunciado='¿Que es Django?')
         pregunta2.save()
-
-        url = '/activities/pregunta_abierta'
+        pregunta3 = PreguntaAbierta(
+            nombre='Pregunta abierta', marca=marca2, enunciado='¿Que es Django?')
+        pregunta3.save()
+        url = '/activities/pregunta_abierta/' + str(marca.pk) + '/'
         response = self.client.get(url, formal='json')
         current_data = json.loads(response.content)
         self.assertEqual(len(current_data), 2)

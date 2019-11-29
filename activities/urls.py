@@ -21,5 +21,5 @@ urlpatterns = [
          PreguntaFoVView.as_view(), name='preguntasFoV'),
     path('pregunta_f_v/create', PreguntaFoVView.as_view(), name='preguntasFoV'),
     path('pausas/<int:marca>/', GetPausesView.as_view(), name="get pauses"),
-    path('pregunta_abierta', GetPreguntaAbierta.as_view(), name="pregunta abierta"),
+    path('pregunta_abierta/<int:marca>/', GetPreguntaAbierta.as_view(), name="pregunta abierta"),
 ]
