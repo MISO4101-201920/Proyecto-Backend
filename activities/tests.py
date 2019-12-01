@@ -1,4 +1,3 @@
-from rest_framework.authtoken.models import Token
 from django.test import TestCase
 from django.utils.timezone import make_aware
 from datetime import datetime
@@ -7,8 +6,10 @@ from rest_framework.test import APIClient
 from rest_framework.utils import json
 
 from interactive_content.models import ContenidoInteractivo, Contenido, Curso, Grupo
-from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion
+from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, PreguntaFoV, Pausa,\
+    PreguntaAbierta
 from users.models import Profesor, Estudiante
+from rest_framework.authtoken.models import Token
 
 
 class AddOpenQuestionTestCase(TestCase):
@@ -133,6 +134,123 @@ class PreguntaTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
+class PreguntaFoVTestCase(TestCase):
+
+    def test_create_question(self):
+        marca = escenario()
+        url = "/activities/pregunta_f_v/create"
+        response = self.client.post(url, {
+            "nombre": "test",
+            "numeroDeIntentos": 1,
+            "marca": marca.pk,
+            "pregunta": "¿Bogotá es la capital de Colombia?",
+            "esVerdadero": True
+        })
+
+        self.assertEqual(response.status_code, 201)
+
+    def test_filter_question(self):
+        marca = escenario()
+        marca2 = escenario()
+        pregunta1 = PreguntaFoV(nombre='test', numeroDeIntentos=1, marca=marca,
+                                pregunta="¿Es python un lenguaje compilado?", esVerdadero=False)
+        pregunta1.save()
+        pregunta2 = PreguntaFoV(nombre='test2', numeroDeIntentos=1, marca=marca,
+                                pregunta="¿Django es un framework para apps móviles?", esVerdadero=False)
+        pregunta2.save()
+        pregunta3 = PreguntaFoV(nombre='test2', numeroDeIntentos=1, marca=marca,
+                                pregunta="¿Django es un framework para apps móviles?", esVerdadero=False)
+        pregunta3.save()
+        pregunta4 = PreguntaFoV(nombre='test2', numeroDeIntentos=1, marca=marca2,
+                                pregunta="¿Django es un framework para apps móviles?", esVerdadero=False)
+        pregunta4.save()
+
+        url = "/activities/pregunta_f_v/" + str(marca.pk) + "/"
+        response = self.client.get(url, formal='json')
+        self.assertEqual(response.status_code, 200)
+
+
+class PauseTestCase(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user_profesor = Profesor.objects.create_superuser('admin', 'admin@admin.com', 'admin123')
+        self.token = Token.objects.create(user=self.user_profesor)
+        self.estudiante = Estudiante.objects.create_user('estudiante', 'estudiante@admin.com', 'estudiante123',
+                                                         codigo_de_estudiante='1232142')
+        self.token_estudiante = Token.objects.create(user=self.estudiante)
+
+    def test_get_pause(self):
+        marca = escenario()
+        marca2 = escenario()
+        pausa1 = Pausa(nombre='prueba', marca=marca,
+                       enunciado='Este es el enunciado de la pausa', tiempo=12.0)
+        pausa1.save()
+        pausa2 = Pausa(nombre='prueba2', marca=marca,
+                       enunciado='Este es el enunciado de la pausa', tiempo=7.0)
+        pausa2.save()
+        pausa3 = Pausa(nombre='prueba3', marca=marca2,
+                       enunciado='Este es el enunciado de la pausa', tiempo=5.0)
+        pausa3.save()
+        url = '/activities/pausas/' + str(marca2.pk) + '/'
+        response = self.client.get(url, formal='json')
+        print(response.content)
+        current_data = json.loads(response.content)
+
+        self.assertEqual(len(current_data), 1)
+
+    def test_pause_creation_by_profesor(self):
+        marca = escenario()
+        url = '/activities/create-pausa/'
+        actividad_dict = dict(nombre='prueba 1',
+                              numeroDeIntentos=1,
+                              tieneRetroalimentacion=True,
+                              marca=marca.id,
+                              retroalimentacion='',
+                              enunciado='Este es el enunciado de la pausa',
+                              tiempo=5.0
+                              )
+        response = self.client.post(url, actividad_dict, format='json',
+                                    HTTP_AUTHORIZATION='Token ' + self.token.key)
+        self.assertEqual(response.status_code, 201)
+        current_data = json.loads(response.content)
+        self.assertEqual(current_data['nombre'], 'prueba 1')
+
+
+    def test_pause_creation_by_estudiante(self):
+        marca = escenario()
+        url = '/activities/create-pausa/'
+        actividad_dict = dict(nombre='prueba 1',
+                              numeroDeIntentos=1,
+                              tieneRetroalimentacion=True,
+                              marca=marca.id,
+                              retroalimentacion='',
+                              enunciado='Este es el enunciado de la pausa',
+                              tiempo=5.0
+                              )
+        response = self.client.post(url, actividad_dict, format='json',
+                                    HTTP_AUTHORIZATION='Token ' + self.token_estudiante.key)
+        current_data = json.loads(response.content)
+        self.assertEqual(current_data['detail'], 'You do not have permission to perform this action.')
+        self.assertEqual(response.status_code, 403)
+
+
+class GetPreguntaAbiertaTest(TestCase):
+    def test_consulta_preg_abierta(self):
+        marca = escenario()
+        pregunta = PreguntaAbierta(
+            nombre='Pregunta abierta', marca=marca, enunciado='¿Que es Django?')
+        pregunta.save()
+        pregunta2 = PreguntaAbierta(
+            nombre='Pregunta abierta', marca=marca, enunciado='¿Que es Django?')
+        pregunta2.save()
+
+        url = '/activities/pregunta_abierta'
+        response = self.client.get(url, formal='json')
+        current_data = json.loads(response.content)
+        self.assertEqual(len(current_data), 2)
+
+
 class RespuestaSeleccionTestCase(TestCase):
     def test_guardar_Respuesta(self):
         opcion = escenario2()
@@ -240,7 +358,8 @@ class CalificacionCase(TestCase):
         url = '/activities/calificacion?estudiante=1'
         response = self.client.get(url, format='json')
         current_data = json.loads(response.content)
-        self.assertEqual(len(current_data), estudiante1.calificacion_set.all().count())
+        self.assertEqual(len(current_data),
+                         estudiante1.calificacion_set.all().count())
 
     def test_filter_calificaiones_by_question(self):
         profe = Profesor.objects.create(
@@ -273,7 +392,8 @@ class CalificacionCase(TestCase):
         url = '/activities/calificacion?actividad={}'.format(pregunta.id)
         response = self.client.get(url, format='json')
         current_data = json.loads(response.content)
-        self.assertEqual(current_data['count'], pregunta.calificacion_set.all().count())
+        self.assertEqual(current_data['count'],
+                         pregunta.calificacion_set.all().count())
 
     def test_filter_obligatory(self):
         profe = Profesor.objects.create(

@@ -10,12 +10,13 @@ from rest_framework.views import APIView
 from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404
 
+from interactive_content.permissions import IsProfesor
 from users.models import Profesor
 from interactive_content.models import ContenidoInteractivo
-from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, \
-    RespuestaSeleccionMultipleSerializer, MarcaSerializer, PreguntaAbiertaSerializer
-from activities.models import Calificacion, Marca, Actividad, RespuestmultipleEstudiante, \
-    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta, PreguntaAbierta
+from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, RespuestaSeleccionMultipleSerializer, MarcaSerializer,\
+    PreguntaFoVSerializer, PausaSerializer, PreguntaAbiertaSerializer
+from activities.models import Calificacion,  Marca, RespuestmultipleEstudiante,\
+    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Pausa, PreguntaAbierta
 
 
 # Create your views here.
@@ -39,7 +40,8 @@ def reports(request, contentpk):
     big_json['facultad'] = get_the_professor.facultad
     big_json['marcas'] = []
 
-    marcas = Marca.objects.filter(contenido__contenido__profesor=get_the_professor, contenido_id=contentpk)
+    marcas = Marca.objects.filter(
+        contenido__contenido__profesor=get_the_professor, contenido_id=contentpk)
     for marca in marcas:
 
         big_json['marcas'].append({'nombre': marca.nombre, 'preguntas': []})
@@ -126,10 +128,43 @@ class CreatePreguntaSeleccionMultiple(APIView):
         question_data = request.data
         marca = createOrGetMarca(question_data)
         options = question_data.pop('opciones')
-        question = PreguntaOpcionMultiple.objects.create(marca=marca, **question_data)
+        question = PreguntaOpcionMultiple.objects.create(
+            marca=marca, **question_data)
         for option in options:
-            Opcionmultiple.objects.create(preguntaSeleccionMultiple=question, **option)
+            Opcionmultiple.objects.create(
+                preguntaSeleccionMultiple=question, **option)
         return Response(data=PreguntaOpcionMultipleSerializer(question).data)
+
+
+class PreguntaFoVView(APIView):
+    def get(self, request, *args, **kwargs):
+        marca = self.kwargs.get('marca', None)
+        questions = PreguntaFoV.objects.filter(marca=marca)
+        serializer = PreguntaFoVSerializer(questions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = PreguntaFoVSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GetPausesView(APIView):
+    def get(self, request, *args, **kwargs):
+        marca = self.kwargs.get('marca', None)
+        pauses = Pausa.objects.filter(marca=marca)
+        serializer = PausaSerializer(pauses, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class GetPreguntaAbierta(APIView):
+    def get(self, request, *args, **kwargs):
+        questions = PreguntaAbierta.objects.all()
+        serializer = PreguntaAbiertaSerializer(questions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class DetailPreguntaSeleccionMultiple(generics.RetrieveUpdateDestroyAPIView, ListModelMixin):
@@ -260,3 +295,10 @@ def intentos_max(request):
 
         print(max_int)
         return JsonResponse({'ultimo_intento': max_int}, status=status.HTTP_200_OK)
+
+
+class PausaDetail(ListCreateAPIView):
+    queryset = Pausa.objects.all()
+    serializer_class = PausaSerializer
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = [IsAuthenticated, IsProfesor]
