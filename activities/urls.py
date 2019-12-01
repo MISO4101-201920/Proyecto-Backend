@@ -1,7 +1,7 @@
 from django.urls import path
 from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVView, GetPausesView, GetPreguntaAbierta, \
     MarcaView, reports, RespuestaSeleccionMultipleView, CreatePreguntaSeleccionMultiple, PausaDetail, \
-    CreatePreguntaAbierta, DetailPreguntaSeleccionMultiple
+    CreatePreguntaAbierta, DetailPreguntaSeleccionMultiple, ResponseVOFDetail
 
 app_name = 'activities'
 # add url path to the API
@@ -22,5 +22,6 @@ urlpatterns = [
     path('pregunta_f_v/create', PreguntaFoVView.as_view(), name='preguntasFoV'),
     path('pausas/<int:marca>/', GetPausesView.as_view(), name="get pauses"),
     path('pregunta_abierta', GetPreguntaAbierta.as_view(), name="pregunta abierta"),
-    path('create-pausa/', PausaDetail.as_view(), name="create pauses")
+    path('create-pausa/', PausaDetail.as_view(), name="create pauses"),
+    path('response-vof/', ResponseVOFDetail.as_view(), name="create response vof"),
 ]
