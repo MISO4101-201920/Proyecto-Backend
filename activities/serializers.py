@@ -1,13 +1,26 @@
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 
 from activities.models import PreguntaOpcionMultiple, RespuestmultipleEstudiante, Opcionmultiple, Calificacion, Marca, \
-    PreguntaAbierta, PreguntaFoV, Pausa
+    PreguntaAbierta, PreguntaFoV, Pausa, RespuestaVoF
 
 
 class RespuestaSeleccionMultipleSerializer(serializers.ModelSerializer):
     class Meta:
         model = RespuestmultipleEstudiante
         fields = '__all__'
+
+
+class RespuestaVOFSerializer(serializers.ModelSerializer):
+    correct_answer = SerializerMethodField('get_serialized_response')
+
+    class Meta:
+        model = RespuestaVoF
+        fields = '__all__'
+
+    def get_serialized_response(self, obj):
+        return {'respuesta_correcta':obj.preguntaVoF.esVerdadero,
+                'retroalimentacion':obj.preguntaVoF.retroalimentacion}
 
 
 class CalificacionSerializer(serializers.ModelSerializer):
