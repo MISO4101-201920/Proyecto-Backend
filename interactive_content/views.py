@@ -142,6 +142,7 @@ def courses_view(request):
         response.renderer_context = {}
         return response
 
+
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -212,3 +213,8 @@ class ContenidoInteractivoDetail(RetrieveUpdateDestroyAPIView):
     queryset = ContenidoInteractivo.objects.all()
     serializer_class = ContenidoInteractivoSerializer
     authentication_classes = (TokenAuthentication,)
+
+
+class GetCourseView(APIView):
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({'message': 'ok'}, status=200)
