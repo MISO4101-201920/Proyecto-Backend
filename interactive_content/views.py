@@ -14,7 +14,8 @@ from rest_framework.views import APIView
 
 from interactive_content.models import Contenido, Curso, ContenidoInteractivo, Grupo
 from interactive_content.permissions import IsProfesor
-from interactive_content.serializers import CursoSerializer, ContenidoInteractivoSerializer, ContenidoSerializer
+from interactive_content.serializers import CursoSerializer, ContenidoInteractivoSerializer, ContenidoSerializer, \
+    CursoDetailsSerializer
 
 
 def get_interactive_contents(user_id):
@@ -217,8 +218,12 @@ class ContenidoInteractivoDetail(RetrieveUpdateDestroyAPIView):
 
 
 class GetCourseView(APIView):
+    queryset = Curso.objects.all()
+    serializer_class = CursoSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = [IsAuthenticated, IsProfesor]
 
-    def get(self):
-        return JsonResponse({'message': 'ok'}, status=200)
+    def get(self, request):
+        cursos = Curso.objects.filter(profesor=request.user)
+        serializer = CursoDetailsSerializer(cursos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
