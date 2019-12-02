@@ -156,4 +156,13 @@ class CourseDetailTestCase(TestCase):
         response = self.client.get(self.url, HTTP_AUTHORIZATION='Token ' + self.token.key)
         self.assertEqual(response.status_code, 200)
 
+    def test_unauthorized_user(self):
+        estudiante = Estudiante.objects.create_user('estudiante', 'estudiante@admin.com', 'estudiante123')
+        self.token = Token.objects.create(user=estudiante)
+        self.client.force_login(user=estudiante)
+        response = self.client.get(self.url, HTTP_AUTHORIZATION='Token ' + self.token.key)
+        current_data = json.loads(response.content)
+        self.assertEqual(current_data['message'], 'Unauthorized')
+        self.assertEqual(response.status_code, 401)
+
 
