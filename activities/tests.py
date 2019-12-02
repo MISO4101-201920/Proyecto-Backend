@@ -134,7 +134,7 @@ class RespuestaPreguntaAbiertaTestCase(TestCase):
                       curso=curso)
         grupo.save()
 
-        url = "/activities/respuestaabierta/"
+        url = "/activities/respuestaAbierta/"
 
         response = self.client.post(url, {"preguntaAbierta": pregunta.id,
                                           "fecha_creacion": "2019-10-25 23:21:51.950232",
