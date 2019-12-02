@@ -128,11 +128,13 @@ class RespuestaPreguntaAbiertaTestCase(TestCase):
         pregunta.save()
 
         estudiante = Estudiante.objects.get(username="Andres1236222r")
-
+        print(estudiante.direccion)
         curso = Curso.objects.filter(nombre="comunicacion Oral")[0]
         grupo = Grupo(estudiante_id=estudiante.id,
                       curso=curso)
         grupo.save()
+
+
 
         url = "/activities/respuestaabierta/"
 
