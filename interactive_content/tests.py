@@ -162,7 +162,7 @@ class CourseDetailTestCase(TestCase):
         self.client.force_login(user=estudiante)
         response = self.client.get(self.url, HTTP_AUTHORIZATION='Token ' + self.token.key)
         current_data = json.loads(response.content)
-        self.assertEqual(current_data['message'], 'Unauthorized')
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(current_data['detail'], 'You do not have permission to perform this action.')
+        self.assertEqual(response.status_code, 403)
 
 
