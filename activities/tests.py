@@ -128,7 +128,7 @@ class RespuestaPreguntaAbiertaTestCase(TestCase):
         pregunta.save()
 
         estudiante = Estudiante.objects.get(username="Andres1236222r")
-        print(estudiante.direccion)
+
         curso = Curso.objects.filter(nombre="comunicacion Oral")[0]
         grupo = Grupo(estudiante_id=estudiante.id,
                       curso=curso)
@@ -136,7 +136,7 @@ class RespuestaPreguntaAbiertaTestCase(TestCase):
 
 
 
-        url = "/activities/respuestaabierta/"
+        url = "/activities/respuestaAbierta/"
 
         response = self.client.post(url, {"preguntaAbierta": pregunta.id,
                                           "fecha_creacion": "2019-10-25 23:21:51.950232",
@@ -167,6 +167,7 @@ class RespuestaPreguntaFoV(TestCase):
         pregunta.pregunta = "preguntaPrueba"
         pregunta.save()
 
+        
         estudiante = Estudiante.objects.get(username="Andres1236222r")
 
         curso = Curso.objects.filter(nombre="comunicacion Oral")[0]
