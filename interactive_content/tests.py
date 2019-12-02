@@ -140,3 +140,20 @@ class InteractiveContentTestCase(TestCase):
         self.assertEqual(data['marcas'][0]['punto'], marca1.punto)
         self.assertEqual(data['marcas'][1]['id'], marca2.id)
         self.assertEqual(data['marcas'][1]['punto'], marca2.punto)
+
+
+class CourseDetailTestCase(TestCase):
+
+    url = '/content/courses/details/'
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = Profesor.objects.create_superuser('admin', 'admin@admin.com', 'admin123')
+        self.token = Token.objects.create(user=self.user)
+
+    def test_get_course_detail(self):
+        self.client.force_login(user=self.user)
+        response = self.client.get(self.url, HTTP_AUTHORIZATION='Token ' + self.token.key)
+        self.assertEqual(response.status_code, 200)
+
+
