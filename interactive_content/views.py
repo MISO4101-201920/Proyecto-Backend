@@ -13,6 +13,7 @@ from rest_framework.utils import json
 from rest_framework.views import APIView
 
 from interactive_content.models import Contenido, Curso, ContenidoInteractivo, Grupo
+from interactive_content.permissions import IsProfesor
 from interactive_content.serializers import CursoSerializer, ContenidoInteractivoSerializer, ContenidoSerializer
 
 
@@ -216,5 +217,8 @@ class ContenidoInteractivoDetail(RetrieveUpdateDestroyAPIView):
 
 
 class GetCourseView(APIView):
-    def get(self, request, *args, **kwargs):
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = [IsAuthenticated, IsProfesor]
+
+    def get(self):
         return JsonResponse({'message': 'ok'}, status=200)
