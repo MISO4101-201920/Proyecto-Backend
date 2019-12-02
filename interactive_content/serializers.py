@@ -32,3 +32,9 @@ class ContenidoInteractivoSerializer(serializers.ModelSerializer):
 
     def get_serialized_classes(self, obj):
         return CursoSerializer(obj.curso.all(),many=True).data
+
+
+class ContenidoInteractivoFieldsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContenidoInteractivo
+        fields = '__all__'
