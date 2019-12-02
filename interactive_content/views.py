@@ -223,7 +223,8 @@ class GetCourseView(APIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = [IsAuthenticated, IsProfesor]
 
-    def get(self, request):
+    @staticmethod
+    def get(request):
         cursos = Curso.objects.filter(profesor=request.user)
         serializer = CursoDetailsSerializer(cursos, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
