@@ -1,3 +1,4 @@
+from django.core import serializers
 from django.db.models import Subquery
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404
@@ -12,12 +13,11 @@ from rest_framework.response import Response
 from rest_framework.utils import json
 from rest_framework.views import APIView
 
-from interactive_content.models import Contenido, Curso, ContenidoInteractivo, Grupo
-from interactive_content.serializers import CursoSerializer, ContenidoInteractivoSerializer, ContenidoSerializer, ContenidoInteractivoFieldsSerializer
-
-from django.core import serializers
-
 from users.models import Estudiante, Usuario, Profesor
+from interactive_content.permissions import IsProfesor
+from interactive_content.models import Contenido, Curso, ContenidoInteractivo, Grupo
+from interactive_content.serializers import CursoSerializer, ContenidoInteractivoSerializer, ContenidoSerializer, \
+    CursoDetailsSerializer, ContenidoInteractivoFieldsSerializer
 
 
 def get_interactive_contents(user_id):
@@ -164,6 +164,7 @@ def courses_view(request):
         response.renderer_context = {}
         return response
 
+
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -234,3 +235,16 @@ class ContenidoInteractivoDetail(RetrieveUpdateDestroyAPIView):
     queryset = ContenidoInteractivo.objects.all()
     serializer_class = ContenidoInteractivoSerializer
     authentication_classes = (TokenAuthentication,)
+
+
+class GetCourseView(APIView):
+    queryset = Curso.objects.all()
+    serializer_class = CursoSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = [IsAuthenticated, IsProfesor]
+
+    @staticmethod
+    def get(request):
+        cursos = Curso.objects.filter(profesor=request.user)
+        serializer = CursoDetailsSerializer(cursos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
