@@ -16,3 +16,10 @@ class IsProfesor(permissions.BasePermission):
         user = request.user
         user_with_roll = user.get_real_instance()
         return user_with_roll.__class__.__name__ == 'Profesor'
+
+
+class IsStudent(permissions.BasePermission):
+    def has_permission(self, request, view):
+        user = request.user
+        user_with_roll = user.get_real_instance()
+        return user_with_roll.__class__.__name__ == 'Estudiante'

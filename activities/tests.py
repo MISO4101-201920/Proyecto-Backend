@@ -130,7 +130,6 @@ class PreguntaTestCase(TestCase):
 
         url = "/activities/preguntaOpcionMultiple" + '/' + str(pregunta.pk) + '/'
         response = self.client.get(url, format='json')
-        print(response.context)
         self.assertEqual(response.status_code, 200)
 
 
@@ -194,7 +193,6 @@ class PauseTestCase(TestCase):
         pausa3.save()
         url = '/activities/pausas/' + str(marca2.pk) + '/'
         response = self.client.get(url, formal='json')
-        print(response.content)
         current_data = json.loads(response.content)
 
         self.assertEqual(len(current_data), 1)
@@ -270,9 +268,6 @@ class RespuestaSeleccionTestCase(TestCase):
 
                                           }
                                     )
-
-        print(response.context)
-        print(response.content)
         self.assertEqual(response.status_code, 201)
 
     def test_respuesta_vacia(self):
@@ -292,9 +287,6 @@ class RespuestaSeleccionTestCase(TestCase):
                                           "curso": grupo.id
                                           }
                                     )
-
-        print(response.context)
-        print(response.content)
         self.assertEqual(response.status_code, 201)
 
 
@@ -456,3 +448,26 @@ class CalificacionCase(TestCase):
         response = self.client.get(url, format='json')
         current_data = json.loads(response.content)
         self.assertEqual(current_data['count'], 2)
+
+
+class CreateVOFResponseTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.estudiante = Estudiante.objects.create_user('estudiante', 'estudiante@admin.com', 'estudiante123',
+                                                         codigo_de_estudiante='1232142')
+        self.token = Token.objects.create(user=self.estudiante)
+        self.marca = escenario()
+        self.pregunta = PreguntaFoV.objects.create(nombre='test', numeroDeIntentos=1, marca=self.marca,
+                                pregunta="¿Es python un lenguaje compilado?", esVerdadero=False)
+
+    def test_vof_response(self):
+        url = '/activities/response-vof/'
+        actividad_dict = dict(pregunta_id=self.pregunta.id,
+                              esVerdadero=True,
+                              )
+        response = self.client.post(url, actividad_dict, format='json',
+                                    HTTP_AUTHORIZATION='Token ' + self.token.key)
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(response.json()['esVerdadero'])
+        self.assertFalse(response.json()['correct_answer']['respuesta_correcta'])
+        self.assertEqual(response.json()['preguntaVoF'], self.pregunta.id)

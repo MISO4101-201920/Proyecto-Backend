@@ -10,11 +10,12 @@ from rest_framework.views import APIView
 from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404
 
-from interactive_content.permissions import IsProfesor
+from interactive_content.permissions import IsProfesor, IsStudent
 from users.models import Profesor
 from interactive_content.models import ContenidoInteractivo
-from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, RespuestaSeleccionMultipleSerializer, MarcaSerializer,\
-    PreguntaFoVSerializer, PausaSerializer, PreguntaAbiertaSerializer
+from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, \
+    RespuestaSeleccionMultipleSerializer, MarcaSerializer, \
+    PreguntaFoVSerializer, PausaSerializer, PreguntaAbiertaSerializer, RespuestaVOFSerializer
 from activities.models import Calificacion,  Marca, RespuestmultipleEstudiante,\
     Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Pausa, PreguntaAbierta
 
@@ -302,3 +303,29 @@ class PausaDetail(ListCreateAPIView):
     serializer_class = PausaSerializer
     authentication_classes = (TokenAuthentication, )
     permission_classes = [IsAuthenticated, IsProfesor]
+
+
+class ResponseVOFDetail(ListCreateAPIView):
+    queryset = RespuestaVoF.objects.all()
+    serializer_class = RespuestaVOFSerializer
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = [IsAuthenticated, IsStudent]
+
+    def post(self, request, *args, **kwargs):
+        pregunta = PreguntaFoV.objects.get(pk=request.data.pop('pregunta_id'))
+        data = request.data
+        data['intento'] = 1
+        user = request.user
+        user_with_roll = user.get_real_instance()
+        respuesta, created = RespuestaVoF.objects.get_or_create(estudiante=user_with_roll, preguntaVoF=pregunta,
+                                                               defaults=data)
+        # valida si el intento de la respuesta es menor o igual al max de intentos permitidos
+        if not created:
+            if respuesta.intento > pregunta.numeroDeIntentos:
+                msj = {'max_attemps': 'Número de intentos maximos excedido'}
+                return Response(msj, status=status.HTTP_406_NOT_ACCEPTABLE)
+            respuesta.intento += 1
+            respuesta.esVerdadero = data['esVerdadero']
+            respuesta.save()
+        serializer = RespuestaVOFSerializer(respuesta)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
