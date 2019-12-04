@@ -159,7 +159,7 @@ class PreguntaFoVView(APIView):
             marca = Marca.objects.get(pk=marca_id)
 
         question = PreguntaFoV.objects.create(
-            marca=marca, tipoActividad=1, **question_data)
+            marca=marca, tipoActividad=2, **question_data)
 
         return Response(PreguntaFoVSerializer(question).data, status=status.HTTP_201_CREATED)
 
