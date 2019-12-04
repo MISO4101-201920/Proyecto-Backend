@@ -1,24 +1,24 @@
-from rest_framework import status, generics, serializers
+
+from rest_framework import status, generics
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.generics import GenericAPIView, RetrieveUpdateDestroyAPIView, ListCreateAPIView
+from rest_framework.generics import GenericAPIView, ListCreateAPIView
 from rest_framework.mixins import ListModelMixin, CreateModelMixin
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework.utils import json
 from rest_framework.views import APIView
 
 from django.http import HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
 
+from interactive_content.permissions import IsProfesor, IsStudent
 from users.models import Profesor
 from interactive_content.models import ContenidoInteractivo
-from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, RespuestaSeleccionMultipleSerializer, MarcaSerializer,\
+from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, \
+    RespuestaSeleccionMultipleSerializer, MarcaSerializer, \
     PreguntaFoVSerializer, PausaSerializer, PreguntaAbiertaSerializer
-from activities.models import Calificacion,  Marca, Actividad, RespuestmultipleEstudiante,\
-    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta, Pausa, PreguntaAbierta
+from activities.models import Calificacion,  Marca, RespuestmultipleEstudiante,\
+    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Pausa, PreguntaAbierta
 
 # Create your views here.
 @api_view(['GET'])
@@ -109,6 +109,10 @@ class MarcaView(ListModelMixin, CreateModelMixin, GenericAPIView):
 
 
 class CreatePreguntaSeleccionMultiple(APIView):
+    authentication_classes = (TokenAuthentication, )
+    permission_classes = [IsAuthenticated, IsProfesor,]
+    
+
     def post(self, request, *args, **kwargs):
         question_data = request.data
         marca_id = question_data.pop('marca_id', None)
@@ -129,6 +133,14 @@ class CreatePreguntaSeleccionMultiple(APIView):
 
 
 class PreguntaFoVView(APIView):
+    authentication_classes = (TokenAuthentication, )
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return (IsAuthenticated(),)
+        else:
+            return (IsProfesor(),)
+
     def get(self, request, *args, **kwargs):
         marca = self.kwargs.get('marca', None)
         questions = PreguntaFoV.objects.filter(marca=marca)
@@ -301,6 +313,6 @@ def intentos_max(request):
 def tipo_actividad(request):
     if request.method == 'GET':
         marca = request.GET.get('id_marca')
-        activity = Actividad.objects.filter(marca=marca)        
-        
+        activity = Actividad.objects.filter(marca=marca)
+
         return JsonResponse({'tipo_actividad': activity[0].tipoActividad})
