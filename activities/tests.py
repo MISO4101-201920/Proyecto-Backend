@@ -8,7 +8,8 @@ from django.contrib.auth.models import User, AbstractUser
 
 from interactive_content.models import ContenidoInteractivo, Contenido, Curso, Grupo
 from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, RespuestmultipleEstudiante, PreguntaFoV, Pausa,\
-    PreguntaAbierta
+    PreguntaAbierta, RespuestaAbiertaEstudiante, PreguntaFoV, RespuestaVoF
+
 from users.models import Profesor, Estudiante
 
 
@@ -115,6 +116,82 @@ class PreguntaTestCase(TestCase):
         print(response.context)
         self.assertEqual(response.status_code, 200)
 
+class RespuestaPreguntaAbiertaTestCase(TestCase):
+
+    def test_Guardar_Respuesta(self):
+
+        marca = escenario()
+        pregunta = PreguntaAbierta()
+        pregunta.nombre = "pregunta1"
+        pregunta.numeroDeIntentos = 1
+        pregunta.tieneRetroalimentacion = True
+        pregunta.marca_id = marca.id
+        pregunta.enunciado = "enunciado"
+        pregunta.save()
+
+        estudiante = Estudiante.objects.get(username="Andres1236222r")
+
+        curso = Curso.objects.filter(nombre="comunicacion Oral")[0]
+        grupo = Grupo(estudiante_id=estudiante.id,
+                      curso=curso)
+        grupo.save()
+
+
+
+        url = "/activities/respuestaAbierta/"
+
+        response = self.client.post(url, {"preguntaAbierta": pregunta.id,
+                                          "fecha_creacion": "2019-10-25 23:21:51.950232",
+                                          "estudiante": estudiante.pk,
+                                          "intento": 1,
+                                          "grupo": grupo.id,
+                                          "respuesta":"respuesta",
+                                          "retroalimentacion" : "retroalimentacion"
+
+                                          }
+                                    )
+
+        print(response.context)
+        print(response.content)
+        self.assertEqual(response.status_code, 201)
+
+class RespuestaPreguntaFoV(TestCase):
+
+    def test_Guardar_Respuesta(self):
+
+        marca = escenario()
+        pregunta = PreguntaFoV()
+        pregunta.nombre = "pregunta1"
+        pregunta.numeroDeIntentos = 1
+        pregunta.tieneRetroalimentacion = True
+        pregunta.marca_id = marca.id
+        pregunta.esVerdadero = True
+        pregunta.pregunta = "preguntaPrueba"
+        pregunta.save()
+
+        
+        estudiante = Estudiante.objects.get(username="Andres1236222r")
+
+        curso = Curso.objects.filter(nombre="comunicacion Oral")[0]
+        grupo = Grupo(estudiante_id=estudiante.id,
+                      curso=curso)
+        grupo.save()
+
+        url = "/activities/respuestafov/"
+
+        response = self.client.post(url, {"preguntaVoF": pregunta.id,
+                                          "fecha_creacion": "2019-10-25 23:21:51.950232",
+                                          "estudiante": estudiante.pk,
+                                          "intento": 1,
+                                          "grupo": grupo.id,
+                                          "esVerdadero" : True
+
+                                          }
+                                    )
+
+        print(response.context)
+        print(response.content)
+        self.assertEqual(response.status_code, 201)
 
 class PreguntaFoVTestCase(TestCase):
 

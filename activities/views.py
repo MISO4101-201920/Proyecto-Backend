@@ -14,11 +14,13 @@ from django.shortcuts import get_object_or_404
 from interactive_content.permissions import IsProfesor, IsStudent
 from users.models import Profesor
 from interactive_content.models import ContenidoInteractivo
+
 from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, \
     RespuestaSeleccionMultipleSerializer, MarcaSerializer, \
-    PreguntaFoVSerializer, PausaSerializer, PreguntaAbiertaSerializer
+    PreguntaFoVSerializer, PausaSerializer, PreguntaAbiertaSerializer, RespuestaAbiertaSerializer, RespuestaFoVSerializer
 from activities.models import Calificacion,  Marca, RespuestmultipleEstudiante,\
-    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Pausa, PreguntaAbierta
+    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Pausa, PreguntaAbierta, Respuesta, RespuestaAbiertaEstudiante
+
 
 # Create your views here.
 @api_view(['GET'])
@@ -109,9 +111,6 @@ class MarcaView(ListModelMixin, CreateModelMixin, GenericAPIView):
 
 
 class CreatePreguntaSeleccionMultiple(APIView):
-    authentication_classes = (TokenAuthentication, )
-    permission_classes = [IsAuthenticated, IsProfesor,]
-    
 
     def post(self, request, *args, **kwargs):
         question_data = request.data
@@ -237,6 +236,88 @@ class RespuestaSeleccionMultipleView(ListModelMixin, CreateModelMixin, GenericAP
             opcion = Opcionmultiple.objects.filter(
                 id=self.request.data['respuestmultiple'])
             pregunta = opcion[0].preguntaSeleccionMultiple
+            # valida si el intento de la respuesta es menor o igual al max de intentos permitidos
+            if int(self.request.data['intento']) <= pregunta.numeroDeIntentos:
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                self.perform_create(serializer)
+                headers = self.get_success_headers(serializer.data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            else:
+                msj = {'max_attemps': 'Número de intentos maximos excedido'}
+                return Response(msj, status=status.HTTP_406_NOT_ACCEPTABLE)
+        else:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class RespuestaAbiertaMultipleView(ListModelMixin, CreateModelMixin, GenericAPIView):
+    queryset = RespuestaAbiertaEstudiante.objects.all()
+    # clase serializer para la transformacion de datos del request
+    serializer_class = RespuestaAbiertaSerializer
+
+    def perform_create(self, serializer):
+        return serializer.save()
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, *kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+         # Validacion de respuesta en blanco (null)
+        if self.request.data['preguntaAbierta']:
+            pregunta1 = PreguntaAbierta.objects.filter(
+                id=self.request.data['preguntaAbierta']
+            )
+            pregunta = pregunta1[0]
+
+           # pregunta = pregunta1[0].preguntaSeleccionMultiple
+            # valida si el intento de la respuesta es menor o igual al max de intentos permitidos
+            if int(self.request.data['intento']) <= pregunta.numeroDeIntentos:
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                self.perform_create(serializer)
+                headers = self.get_success_headers(serializer.data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            else:
+                msj = {'max_attemps': 'Número de intentos maximos excedido'}
+                return Response(msj, status=status.HTTP_406_NOT_ACCEPTABLE)
+        else:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+class RespuestaFoVMultipleView(ListModelMixin, CreateModelMixin, GenericAPIView):
+
+    queryset = RespuestaVoF.objects.all()
+    # clase serializer para la transformacion de datos del request
+    serializer_class = RespuestaFoVSerializer
+
+    def perform_create(self, serializer):
+        return serializer.save()
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, *kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+         # Validacion de respuesta en blanco (null)
+        if self.request.data['preguntaVoF']:
+            pregunta1 = PreguntaFoV.objects.filter(
+                id=self.request.data['preguntaVoF']
+            )
+            pregunta = pregunta1[0]
+
+           # pregunta = pregunta1[0].preguntaSeleccionMultiple
             # valida si el intento de la respuesta es menor o igual al max de intentos permitidos
             if int(self.request.data['intento']) <= pregunta.numeroDeIntentos:
                 serializer = self.get_serializer(data=request.data)
