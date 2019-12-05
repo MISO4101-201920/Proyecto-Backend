@@ -18,6 +18,8 @@ urlpatterns = [
     path('marca', MarcaApi.as_view(), name='marca'),
     path('ultimo_intento', intentos_max),
     path('ultimo_intentoVof', intentos_maxVof),
+	path('intentos_maxOpen', intentos_maxOpen),
+	path('respuestaAbierta/', RespuestaAbiertaMultipleView.as_view()),
     path('pregunta_f_v/<int:marca>/',
          PreguntaFoVView.as_view(), name='preguntasFoV'),
     path('pregunta_f_v/create', PreguntaFoVView.as_view(), name='preguntasFoV'),

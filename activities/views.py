@@ -17,9 +17,9 @@ from users.models import Profesor
 from interactive_content.models import ContenidoInteractivo
 from activities.serializers import PreguntaOpcionMultipleSerializer, CalificacionSerializer, \
     RespuestaSeleccionMultipleSerializer, MarcaSerializer, \
-    PreguntaFoVSerializer, PausaSerializer, PreguntaAbiertaSerializer, RespuestaFoVSerializer
+    PreguntaFoVSerializer, PausaSerializer, PreguntaAbiertaSerializer, RespuestaFoVSerializer,RespuestaAbiertaSerializer
 from activities.models import Calificacion, Marca, Actividad, RespuestmultipleEstudiante, \
-    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta, Pausa, PreguntaAbierta
+    Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Respuesta, Pausa, PreguntaAbierta,RespuestaAbiertaEstudiante
 
 
 # Create your views here.
@@ -84,6 +84,45 @@ def reports(request, contentpk):
 
     return JsonResponse(big_json)
 
+class RespuestaAbiertaMultipleView(ListModelMixin, CreateModelMixin, GenericAPIView):
+    queryset = RespuestaAbiertaEstudiante.objects.all()
+    # clase serializer para la transformacion de datos del request
+    serializer_class = RespuestaAbiertaSerializer
+
+    def perform_create(self, serializer):
+        return serializer.save()
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, *kwargs)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+         # Validacion de respuesta en blanco (null)
+        if self.request.data['preguntaAbierta']:
+            pregunta1 = PreguntaAbierta.objects.filter(
+                id=self.request.data['preguntaAbierta']
+            )
+            pregunta = pregunta1[0]
+
+           # pregunta = pregunta1[0].preguntaSeleccionMultiple
+            # valida si el intento de la respuesta es menor o igual al max de intentos permitidos
+            if int(self.request.data['intento']) <= pregunta.numeroDeIntentos:
+                serializer = self.get_serializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                self.perform_create(serializer)
+                headers = self.get_success_headers(serializer.data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            else:
+                msj = {'max_attemps': 'Número de intentos maximos excedido'}
+                return Response(msj, status=status.HTTP_406_NOT_ACCEPTABLE)
+        else:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class MarcaView(ListModelMixin, CreateModelMixin, GenericAPIView):
     # Add permissions to the view
@@ -313,6 +352,20 @@ def intentos_maxVof(request):
         print(intentos_maxVof)
 
         return JsonResponse({'ultimo_intento': intentos_maxVof}, status=status.HTTP_200_OK)
+
+def intentos_maxOpen(request):
+    if request.method == 'GET':
+        estudiante = request.GET.get('id_estudiante')
+        pregunta = request.GET.get('id_pregunta')
+        try:
+           intentos_maxOpen = RespuestaAbiertaEstudiante.objects.filter(estudiante=estudiante, preguntaAbierta=pregunta).order_by('-id')[0].intento 
+        except Exception as e:
+            intentos_maxOpen = 0
+
+        print("carevergas")
+        print(intentos_maxOpen)
+
+        return JsonResponse({'ultimo_intento': intentos_maxOpen}, status=status.HTTP_200_OK)
 
 
 def tipo_actividad(request):

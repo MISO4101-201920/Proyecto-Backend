@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from activities.models import PreguntaOpcionMultiple, RespuestmultipleEstudiante, Opcionmultiple, Calificacion, Marca, \
-    PreguntaFoV, Pausa, PreguntaAbierta, RespuestaVoF
+    PreguntaFoV, Pausa, PreguntaAbierta, RespuestaVoF,RespuestaAbiertaEstudiante
 
 
 class RespuestaSeleccionMultipleSerializer(serializers.ModelSerializer):
@@ -62,4 +62,9 @@ class PreguntaAbiertaSerializer(serializers.ModelSerializer):
 class RespuestaFoVSerializer(serializers.ModelSerializer):
     class Meta:
         model = RespuestaVoF
+        fields = '__all__'
+
+class RespuestaAbiertaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RespuestaAbiertaEstudiante
         fields = '__all__'
