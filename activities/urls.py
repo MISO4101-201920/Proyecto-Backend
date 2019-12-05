@@ -17,10 +17,12 @@ urlpatterns = [
          CreatePreguntaSeleccionMultiple.as_view(), name='pregunta seleccion multiple '),
     path('marca', MarcaApi.as_view(), name='marca'),
     path('ultimo_intento', intentos_max),
+    path('ultimo_intentoVof', intentos_maxVof),
     path('pregunta_f_v/<int:marca>/',
          PreguntaFoVView.as_view(), name='preguntasFoV'),
     path('pregunta_f_v/create', PreguntaFoVView.as_view(), name='preguntasFoV'),
     path('pausas/<int:marca>/', GetPausesView.as_view(), name="get pauses"),
     path('pregunta_abierta/<int:marca>/', GetPreguntaAbierta.as_view(), name="pregunta abierta"),
+    path('respuestafov/', RespuestaFoVMultipleView.as_view()),
     path('tipo_actividad', tipo_actividad),
 ]
