@@ -1,8 +1,8 @@
 from django.urls import path
-from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVView, GetPausesView, GetPreguntaAbierta, tipo_actividad
 from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVView, GetPausesView, GetPreguntaAbierta, \
     MarcaView, reports, RespuestaSeleccionMultipleView, CreatePreguntaSeleccionMultiple, PausaDetail, \
-    CreatePreguntaAbierta, DetailPreguntaSeleccionMultiple, ResponseVOFDetail
+    CreatePreguntaAbierta, DetailPreguntaSeleccionMultiple, \
+    tipo_actividad, RespuestaAbiertaMultipleView, RespuestaFoVMultipleView
 
 app_name = 'activities'
 # add url path to the API
