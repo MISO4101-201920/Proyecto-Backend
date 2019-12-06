@@ -4,10 +4,13 @@ from datetime import datetime
 import json
 from rest_framework.test import APIClient
 from rest_framework.utils import json
+from django.contrib.auth.models import User, AbstractUser
+from rest_framework.authtoken.models import Token
 
 from interactive_content.models import ContenidoInteractivo, Contenido, Curso, Grupo
-from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, PreguntaFoV, Pausa,\
-    PreguntaAbierta
+from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, RespuestmultipleEstudiante, PreguntaFoV, Pausa,\
+    PreguntaAbierta, RespuestaAbiertaEstudiante, PreguntaFoV, RespuestaVoF
+
 from users.models import Profesor, Estudiante
 from rest_framework.authtoken.models import Token
 
@@ -114,6 +117,64 @@ def escenario2():
     return opcion
 
 
+def escenario3():
+    naive_datetime = datetime.now()
+    aware_datetime = make_aware(naive_datetime)
+
+    profesor = Profesor(facultad="derecho",
+                        direccion="cra 76#89-10",
+                        telefono="1233322",
+                        fecha_creacion=aware_datetime,
+                        fecha_modificacion=datetime.now(),
+                        username="Pablo123674",
+                        email="pablo44@gmail.com",
+                        password="qwer44tyu"
+                        )
+    profesor.id = 33333
+
+    profesor.save()
+
+    estudiante = Estudiante(codigo_de_estudiante="232223555",
+                            direccion="cra 76#89-13",
+                            telefono="1233323442",
+                            fecha_creacion=aware_datetime,
+                            fecha_modificacion=datetime.now(),
+                            username="Andres1236222r",
+                            email="andres222225@gmail.com",
+                            password="qwer2222tyu"
+                            )
+
+    estudiante.id = 22333
+
+    estudiante.save()
+
+    contenido = Contenido(url="https://www.youtube.com/watch?v=FRivqBxbHRs",
+                          nombre="video",
+                          profesor=profesor
+                          )
+    contenido.save()
+
+    curso = Curso(nombre="comunicacion Oral",
+                  descripcion="Desarrollar habilidades orales",
+                  profesor=profesor
+                  )
+    curso.save()
+
+    contenidoInteractivo = ContenidoInteractivo(contenido=contenido,
+                                                tiene_retroalimentacion=True,
+                                                tiempo_disponibilidad=aware_datetime
+                                                )
+    contenidoInteractivo.save()
+    contenidoInteractivo.curso.add(curso)
+
+    marca = Marca(nombre="marca1",
+                  punto=33,
+                  contenido=contenidoInteractivo
+                  )
+    marca.save()
+    return marca, profesor, estudiante, contenidoInteractivo
+
+
 class PreguntaTestCase(TestCase):
 
     def test_Get_Pregunta(self):
@@ -133,23 +194,106 @@ class PreguntaTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-class PreguntaFoVTestCase(TestCase):
+class RespuestaPreguntaAbiertaTestCase(TestCase):
 
-    def test_create_question(self):
+    def test_Guardar_Respuesta(self):
+
         marca = escenario()
-        url = "/activities/pregunta_f_v/create"
-        response = self.client.post(url, {
-            "nombre": "test",
-            "numeroDeIntentos": 1,
-            "marca": marca.pk,
-            "pregunta": "¿Bogotá es la capital de Colombia?",
-            "esVerdadero": True
-        })
+        pregunta = PreguntaAbierta()
+        pregunta.nombre = "pregunta1"
+        pregunta.numeroDeIntentos = 1
+        pregunta.tieneRetroalimentacion = True
+        pregunta.marca_id = marca.id
+        pregunta.enunciado = "enunciado"
+        pregunta.save()
 
+        estudiante = Estudiante.objects.get(username="Andres1236222r")
+
+        curso = Curso.objects.filter(nombre="comunicacion Oral")[0]
+        grupo = Grupo(estudiante_id=estudiante.id,
+                      curso=curso)
+        grupo.save()
+
+        url = "/activities/respuestaAbierta/"
+
+        response = self.client.post(url, {"preguntaAbierta": pregunta.id,
+                                          "fecha_creacion": "2019-10-25 23:21:51.950232",
+                                          "estudiante": estudiante.pk,
+                                          "intento": 1,
+                                          "grupo": grupo.id,
+                                          "respuesta": "respuesta",
+                                          "retroalimentacion": "retroalimentacion"
+
+                                          }
+                                    )
+
+        print(response.context)
+        print(response.content)
         self.assertEqual(response.status_code, 201)
 
-    def test_filter_question(self):
+
+class RespuestaPreguntaFoV(TestCase):
+
+    def test_Guardar_Respuesta(self):
+
         marca = escenario()
+        pregunta = PreguntaFoV()
+        pregunta.nombre = "pregunta1"
+        pregunta.numeroDeIntentos = 1
+        pregunta.tieneRetroalimentacion = True
+        pregunta.marca_id = marca.id
+        pregunta.esVerdadero = True
+        pregunta.pregunta = "preguntaPrueba"
+        pregunta.save()
+
+        estudiante = Estudiante.objects.get(username="Andres1236222r")
+
+        curso = Curso.objects.filter(nombre="comunicacion Oral")[0]
+        grupo = Grupo(estudiante_id=estudiante.id,
+                      curso=curso)
+        grupo.save()
+
+        url = "/activities/respuestafov/"
+
+        response = self.client.post(url, {"preguntaVoF": pregunta.id,
+                                          "fecha_creacion": "2019-10-25 23:21:51.950232",
+                                          "estudiante": estudiante.pk,
+                                          "intento": 1,
+                                          "grupo": grupo.id,
+                                          "esVerdadero": True
+
+                                          }
+                                    )
+
+        print(response.context)
+        print(response.content)
+        self.assertEqual(response.status_code, 201)
+
+
+class PreguntaFoVTestCase(TestCase):
+
+    # def test_create_question(self):
+    #    marca, profesor, estudiante, contInterac = escenario3()
+    #    token_prof = Token.objects.create(user=profesor)
+    #    url = "/activities/pregunta_f_v/create"
+    #    print('=+' * 70)
+    #    print(marca.pk)
+    #    pregunta = {
+    #        "nombre": "test",
+    #        "numeroDeIntentos": "1",
+    #        "tieneRetroalimentacion": False,
+    #        "retroalimentacion": "",
+    #        "pregunta": "¿Bogotá es la capital de Colombia?",
+    #        "esVerdadero": True,
+    #        "marca_id": marca.pk
+    #    }
+    #    response = self.client.post(
+    #        url, pregunta, format='json', HTTP_AUTHORIZATION='Token ' + token_prof.key)
+    #    self.assertEqual(response.status_code, 201)
+
+    def test_filter_question(self):
+        marca, profesor, estudiante, contInteract = escenario3()
+        token_student = Token.objects.create(user=estudiante)
         marca2 = escenario()
         pregunta1 = PreguntaFoV(nombre='test', numeroDeIntentos=1, marca=marca,
                                 pregunta="¿Es python un lenguaje compilado?", esVerdadero=False)
@@ -165,7 +309,8 @@ class PreguntaFoVTestCase(TestCase):
         pregunta4.save()
 
         url = "/activities/pregunta_f_v/" + str(marca.pk) + "/"
-        response = self.client.get(url, formal='json')
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION='Token ' + token_student.key, formal='json')
         self.assertEqual(response.status_code, 200)
 
 
@@ -236,14 +381,17 @@ class PauseTestCase(TestCase):
 class GetPreguntaAbiertaTest(TestCase):
     def test_consulta_preg_abierta(self):
         marca = escenario()
+        marca2 = escenario()
         pregunta = PreguntaAbierta(
             nombre='Pregunta abierta', marca=marca, enunciado='¿Que es Django?')
         pregunta.save()
         pregunta2 = PreguntaAbierta(
             nombre='Pregunta abierta', marca=marca, enunciado='¿Que es Django?')
         pregunta2.save()
-
-        url = '/activities/pregunta_abierta'
+        pregunta3 = PreguntaAbierta(
+            nombre='Pregunta abierta', marca=marca2, enunciado='¿Que es Django?')
+        pregunta3.save()
+        url = '/activities/pregunta_abierta/' + str(marca.pk) + '/'
         response = self.client.get(url, formal='json')
         current_data = json.loads(response.content)
         self.assertEqual(len(current_data), 2)
