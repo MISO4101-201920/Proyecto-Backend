@@ -266,7 +266,7 @@ class PreguntaFoVTestCase(TestCase):
             "marca_id": marca.pk
         }
         response = self.client.post(
-            url, data=pregunta)
+            url, data=pregunta, format='json')
         self.assertEqual(response.status_code, 201)
 
     def test_filter_question(self):
