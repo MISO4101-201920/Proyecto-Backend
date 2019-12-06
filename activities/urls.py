@@ -1,6 +1,6 @@
 from activities.views import *
 from django.urls import path
-from activities.views import CalificarAPI, MarcaApi, intentos_max
+from activities.views import CalificarAPI, MarcaApi, intentos_max, PreguntaFoVView, GetPausesView, GetPreguntaAbierta, tipo_actividad
 app_name = 'activities'
 
 
@@ -12,9 +12,18 @@ urlpatterns = [
     path('reports/<int:contentpk>', reports, name='reports'),
     path('respuestaOpcionMultiple/', RespuestaSeleccionMultipleView.as_view()),
     path('respuestaAbierta/', RespuestaAbiertaMultipleView.as_view()),
-    path('preguntaOpcionMultiple/<int:marca>/', DetailPreguntaSeleccionMultiple.as_view()),
+    path('respuestafov/', RespuestaFoVMultipleView.as_view()),
+    path('preguntaOpcionMultiple/<int:marca>/',
+         DetailPreguntaSeleccionMultiple.as_view()),
     path('calificacion', CalificarAPI.as_view(), name='calificacion'),
-    path('generate-question-multiple-choice', CreatePreguntaSeleccionMultiple.as_view(), name='pregunta seleccion multiple '),
+    path('generate-question-multiple-choice',
+         CreatePreguntaSeleccionMultiple.as_view(), name='pregunta seleccion multiple '),
     path('marca', MarcaApi.as_view(), name='marca'),
-    path('ultimo_intento', intentos_max)
+    path('ultimo_intento', intentos_max),
+    path('pregunta_f_v/<int:marca>/',
+         PreguntaFoVView.as_view(), name='preguntasFoV'),
+    path('pregunta_f_v/create', PreguntaFoVView.as_view(), name='preguntasFoV'),
+    path('pausas/<int:marca>/', GetPausesView.as_view(), name="get pauses"),
+    path('pregunta_abierta/<int:marca>/', GetPreguntaAbierta.as_view(), name="pregunta abierta"),
+    path('tipo_actividad', tipo_actividad),
 ]

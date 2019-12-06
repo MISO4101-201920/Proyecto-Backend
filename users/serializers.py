@@ -15,4 +15,4 @@ class EstudianteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Estudiante
-        fields = ('codigo_de_estudiante', 'first_name', 'last_name', 'email', 'direccion', 'telefono', 'username')
+        fields = '__all__'
