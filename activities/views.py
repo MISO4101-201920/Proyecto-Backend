@@ -148,7 +148,7 @@ class PreguntaFoVView(APIView):
 
     def post(self, request, *args, **kwargs):
         question_data = request.data
-        marca_id = question_data.pop('marca_id', None)
+        marca_id = question_data.get('marca_id', None)
         if not marca_id:
             interactive_content = ContenidoInteractivo.objects.get(
                 id=question_data['marca'].pop('contenido_id'))
@@ -294,6 +294,7 @@ class RespuestaAbiertaMultipleView(ListModelMixin, CreateModelMixin, GenericAPIV
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+
 class RespuestaFoVMultipleView(ListModelMixin, CreateModelMixin, GenericAPIView):
 
     queryset = RespuestaVoF.objects.all()
@@ -374,21 +375,28 @@ def intentos_max(request):
 
         respuestas = RespuestmultipleEstudiante.objects.filter(
             estudiante=estudiante)
-        resps = []
+        resps = get_intento_estudiante(respuestas)
+        max_int = validate_resps(resps)        
+        
+        return JsonResponse({'ultimo_intento': max_int}, status=status.HTTP_200_OK)
 
-        for respuesta in respuestas:
+def get_intento_estudiante(respuestas):
+    resps = []
+
+    for respuesta in respuestas:
             for opcion in opciones:
-                if respuesta.respuestmultiple == opcion:
-                    print('ALGO')
+                if respuesta.respuestmultiple == opcion:                    
                     if respuesta.intento:
                         resps.append(respuesta.intento)
-        if len(resps) > 0:
+    return resps
+
+def validate_resps(resps):
+    if len(resps) > 0:
             max_int = max(resps)
         else:
             max_int = 0
-
-        print(max_int)
-        return JsonResponse({'ultimo_intento': max_int}, status=status.HTTP_200_OK)
+    
+    return max_int
 
 
 def tipo_actividad(request):
