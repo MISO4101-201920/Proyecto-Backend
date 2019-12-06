@@ -134,7 +134,7 @@ class CreatePreguntaSeleccionMultiple(APIView):
 class PreguntaFoVView(APIView):
     #authentication_classes = (TokenAuthentication, )
 
-    #def get_permissions(self):
+    # def get_permissions(self):
     #    if self.request.method == 'GET':
     #        return (IsAuthenticated(),)
     #    else:
@@ -376,26 +376,28 @@ def intentos_max(request):
         respuestas = RespuestmultipleEstudiante.objects.filter(
             estudiante=estudiante)
         resps = get_intento_estudiante(respuestas)
-        max_int = validate_resps(resps)        
-        
+        max_int = validate_resps(resps)
+
         return JsonResponse({'ultimo_intento': max_int}, status=status.HTTP_200_OK)
+
 
 def get_intento_estudiante(respuestas):
     resps = []
 
     for respuesta in respuestas:
-            for opcion in opciones:
-                if respuesta.respuestmultiple == opcion:                    
-                    if respuesta.intento:
-                        resps.append(respuesta.intento)
+        for opcion in opciones:
+            if respuesta.respuestmultiple == opcion:
+                if respuesta.intento:
+                    resps.append(respuesta.intento)
     return resps
+
 
 def validate_resps(resps):
     if len(resps) > 0:
-            max_int = max(resps)
+        max_int = max(resps)
     else:
         max_int = 0
-    
+
     return max_int
 
 
