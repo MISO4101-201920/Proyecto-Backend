@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from rest_framework import status, generics, serializers
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
