@@ -159,13 +159,21 @@ class PreguntaFoVView(APIView):
         serializer = PreguntaFoVSerializer(questions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        serializer = PreguntaFoVSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def post(self, request, *args, **kwargs):
+        question_data = request.data
+        marca_id = question_data.get('marca_id', None)
+        if not marca_id:
+            interactive_content = ContenidoInteractivo.objects.get(
+                id=question_data['marca'].pop('contenido_id'))
+            marca = Marca.objects.create(
+                contenido=interactive_content, **question_data.pop('marca'))
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            marca = Marca.objects.get(pk=marca_id)
+
+        question = PreguntaFoV.objects.create(
+            marca=marca, tipoActividad=2, **question_data)
+
+        return Response(PreguntaFoVSerializer(question).data, status=status.HTTP_201_CREATED)
 
 
 class GetPausesView(APIView):
