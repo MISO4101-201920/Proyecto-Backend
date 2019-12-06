@@ -114,8 +114,10 @@ def createOrGetMarca(question_data):
     marca_id = question_data.pop('marca_id', None)
     marca = None
     if not marca_id:
-        interactive_content = ContenidoInteractivo.objects.get(id=question_data['marca'].pop('contenido_id'))
-        marca = Marca.objects.create(contenido=interactive_content, **question_data.pop('marca'))
+        interactive_content = ContenidoInteractivo.objects.get(
+            id=question_data['marca'].pop('contenido_id'))
+        marca = Marca.objects.create(
+            contenido=interactive_content, **question_data.pop('marca'))
     else:
         marca = Marca.objects.get(pk=marca_id)
     return marca
@@ -319,9 +321,6 @@ def validate_resps(resps):
         max_int = 0
 
     return max_int
-
-        print(max_int)
-        return JsonResponse({'ultimo_intento': max_int}, status=status.HTTP_200_OK)
 
 
 class PausaDetail(ListCreateAPIView):
