@@ -34,6 +34,12 @@ class ContenidoInteractivoSerializer(serializers.ModelSerializer):
         return CursoSerializer(obj.curso.all(), many=True).data
 
 
+class ContenidoInteractivoFieldsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContenidoInteractivo
+        fields = '__all__'
+
+
 class ContenidoInteractivoDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContenidoInteractivo
