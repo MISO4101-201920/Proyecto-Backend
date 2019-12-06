@@ -295,13 +295,13 @@ def intentos_max(request):
 
         respuestas = RespuestmultipleEstudiante.objects.filter(
             estudiante=estudiante)
-        resps = get_intento_estudiante(respuestas)
+        resps = get_intento_estudiante(respuestas, opciones)
         max_int = validate_resps(resps)
 
         return JsonResponse({'ultimo_intento': max_int}, status=status.HTTP_200_OK)
 
 
-def get_intento_estudiante(respuestas):
+def get_intento_estudiante(respuestas, opciones):
     resps = []
 
     for respuesta in respuestas:
