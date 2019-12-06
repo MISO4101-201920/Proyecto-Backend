@@ -254,24 +254,24 @@ class RespuestaPreguntaFoV(TestCase):
 
 class PreguntaFoVTestCase(TestCase):
 
-    # def test_create_question(self):
-    #    marca, profesor, estudiante, contInterac = escenario3()
-    #    token_prof = Token.objects.create(user=profesor)
-    #    url = "/activities/pregunta_f_v/create"
-    #    print('=+' * 70)
-    #    print(marca.pk)
-    #    pregunta = {
-    #        "nombre": "test",
-    #        "numeroDeIntentos": "1",
-    #        "tieneRetroalimentacion": False,
-    #        "retroalimentacion": "",
-    #        "pregunta": "¿Bogotá es la capital de Colombia?",
-    #        "esVerdadero": True,
-    #        "marca_id": marca.pk
-    #    }
-    #    response = self.client.post(
-    #        url, pregunta, format='json', HTTP_AUTHORIZATION='Token ' + token_prof.key)
-    #    self.assertEqual(response.status_code, 201)
+    def test_create_question(self):
+       marca, profesor, estudiante, contInterac = escenario3()
+       token_prof = Token.objects.create(user=profesor)
+       url = "/activities/pregunta_f_v/create"
+       print('=+' * 70)
+       print(marca.pk)
+       pregunta = {
+           "nombre": "test",
+           "numeroDeIntentos": "1",
+           "tieneRetroalimentacion": False,
+           "retroalimentacion": "",
+           "pregunta": "¿Bogotá es la capital de Colombia?",
+           "esVerdadero": True,
+           "marca_id": marca.pk
+       }
+       response = self.client.post(
+           url, pregunta, format='json', HTTP_AUTHORIZATION='Token ' + token_prof.key)
+       self.assertEqual(response.status_code, 201)
 
     def test_filter_question(self):
         marca, profesor, estudiante, contInteract = escenario3()

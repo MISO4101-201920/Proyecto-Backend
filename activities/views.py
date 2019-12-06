@@ -132,13 +132,13 @@ class CreatePreguntaSeleccionMultiple(APIView):
 
 
 class PreguntaFoVView(APIView):
-    authentication_classes = (TokenAuthentication, )
+    #authentication_classes = (TokenAuthentication, )
 
-    def get_permissions(self):
-        if self.request.method == 'GET':
-            return (IsAuthenticated(),)
-        else:
-            return (IsProfesor(),)
+    #def get_permissions(self):
+    #    if self.request.method == 'GET':
+    #        return (IsAuthenticated(),)
+    #    else:
+    #        return (IsProfesor(),)
 
     def get(self, request, *args, **kwargs):
         marca = self.kwargs.get('marca', None)
