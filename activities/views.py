@@ -304,6 +304,12 @@ class PausaDetail(ListCreateAPIView):
     authentication_classes = (TokenAuthentication, )
     permission_classes = [IsAuthenticated, IsProfesor]
 
+    def post(self, request, *args, **kwargs):
+        question_data = request.data
+        marca = createOrGetMarca(question_data)
+        question = Pausa.objects.create(marca=marca, **question_data)
+        return Response(data=PausaSerializer(question).data)
+
 
 class ResponseVOFDetail(ListCreateAPIView):
     queryset = RespuestaVoF.objects.all()
