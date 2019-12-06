@@ -6,6 +6,7 @@ from rest_framework.test import APIClient
 from rest_framework.utils import json
 from django.contrib.auth.models import User, AbstractUser
 from rest_framework.authtoken.models import Token
+from rest_framework.test import APIClient
 
 from interactive_content.models import ContenidoInteractivo, Contenido, Curso, Grupo
 from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, RespuestmultipleEstudiante, PreguntaFoV, Pausa,\
@@ -191,6 +192,7 @@ class PreguntaTestCase(TestCase):
 
         url = "/activities/preguntaOpcionMultiple" + '/' + str(pregunta.pk) + '/'
         response = self.client.get(url, format='json')
+
         self.assertEqual(response.status_code, 200)
 
 
@@ -227,8 +229,6 @@ class RespuestaPreguntaAbiertaTestCase(TestCase):
                                           }
                                     )
 
-        print(response.context)
-        print(response.content)
         self.assertEqual(response.status_code, 201)
 
 
@@ -265,31 +265,28 @@ class RespuestaPreguntaFoV(TestCase):
                                           }
                                     )
 
-        print(response.context)
-        print(response.content)
         self.assertEqual(response.status_code, 201)
 
 
 class PreguntaFoVTestCase(TestCase):
 
-    # def test_create_question(self):
-    #    marca, profesor, estudiante, contInterac = escenario3()
-    #    token_prof = Token.objects.create(user=profesor)
-    #    url = "/activities/pregunta_f_v/create"
-    #    print('=+' * 70)
-    #    print(marca.pk)
-    #    pregunta = {
-    #        "nombre": "test",
-    #        "numeroDeIntentos": "1",
-    #        "tieneRetroalimentacion": False,
-    #        "retroalimentacion": "",
-    #        "pregunta": "¿Bogotá es la capital de Colombia?",
-    #        "esVerdadero": True,
-    #        "marca_id": marca.pk
-    #    }
-    #    response = self.client.post(
-    #        url, pregunta, format='json', HTTP_AUTHORIZATION='Token ' + token_prof.key)
-    #    self.assertEqual(response.status_code, 201)
+    def test_create_question(self):
+        self.client = APIClient()
+        marca, profesor, estudiante, contInterac = escenario3()
+        token_prof = Token.objects.create(user=profesor)
+        url = "/activities/pregunta_f_v/create"
+        pregunta = {
+            "nombre": "test",
+            "numeroDeIntentos": "1",
+            "tieneRetroalimentacion": False,
+            "retroalimentacion": "",
+            "pregunta": "¿Bogotá es la capital de Colombia?",
+            "esVerdadero": True,
+            "marca_id": marca.pk
+        }
+        response = self.client.post(
+            url, data=pregunta, format='json')
+        self.assertEqual(response.status_code, 201)
 
     def test_filter_question(self):
         marca, profesor, estudiante, contInteract = escenario3()
@@ -416,6 +413,7 @@ class RespuestaSeleccionTestCase(TestCase):
 
                                           }
                                     )
+
         self.assertEqual(response.status_code, 201)
 
     def test_respuesta_vacia(self):
@@ -435,6 +433,7 @@ class RespuestaSeleccionTestCase(TestCase):
                                           "curso": grupo.id
                                           }
                                     )
+
         self.assertEqual(response.status_code, 201)
 
 
