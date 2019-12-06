@@ -1,13 +1,15 @@
 import json
 from rest_framework.test import APIClient
-from django.test import TestCase, Client
-from .models import Contenido, ContenidoInteractivo, Curso
+from django.test import TestCase
+from .models import ContenidoInteractivo, Curso, Grupo
 from datetime import datetime
 
 from interactive_content.models import Contenido
 from users.models import Profesor, Estudiante
 from rest_framework.authtoken.models import Token
 from activities.models import Marca
+
+
 # Create your tests here.
 # Create your tests here.
 class CreateInteractiveContentTestCase(TestCase):
@@ -19,9 +21,9 @@ class CreateInteractiveContentTestCase(TestCase):
 
     def test_add_interactive_content(self):
         url = '/content/cont_interactivo'
-        interactive_content = {"nombre": "test", "contenido": "1"}
         self.client.force_login(user=self.user)
         contenido = Contenido.objects.create(url="test.com", nombre="contenido test", profesor_id=self.user.id)
+        interactive_content = {"nombre": "test", "contenido": contenido.id}
         response = self.client.post(url, interactive_content, format='json',
                                     HTTP_AUTHORIZATION='Token ' + self.token.key)
         current_data = json.loads(response.content)
@@ -53,9 +55,9 @@ class InteractiveContentTestCase(TestCase):
 
     def test_add_interactive_content(self):
         url = '/content/cont_interactivo'
-        interactive_content = {"nombre": "test", "contenido": "1"}
         self.client.force_login(user=self.user)
         contenido = Contenido.objects.create(url="test.com", nombre="contenido test", profesor_id=self.user.id)
+        interactive_content = {"nombre": "test", "contenido": contenido.id}
         response = self.client.post(url, interactive_content, format='json',
                                     HTTP_AUTHORIZATION='Token ' + self.token.key)
         current_data = json.loads(response.content)
@@ -100,10 +102,13 @@ class InteractiveContentTestCase(TestCase):
 
     def test_get_courses_from_interactive_content(self):
         content = Contenido.objects.create(url="youtube.com", nombre="Mi primer contenido", profesor=self.user)
-        interactive_content = ContenidoInteractivo.objects.create(contenido=content, fecha_creacion=datetime.now(), tiene_retroalimentacion=True)
+        interactive_content = ContenidoInteractivo.objects.create(contenido=content, fecha_creacion=datetime.now(),
+                                                                  tiene_retroalimentacion=True)
 
-        curso1 = Curso.objects.create(fecha_creacion=datetime.now(), nombre="Mi primer curso", profesor=self.user, descripcion="Breve descripcion 1")
-        curso2 = Curso.objects.create(fecha_creacion=datetime.now(), nombre="Mi segundo curso", profesor=self.user, descripcion="Breve descripcion 2")
+        curso1 = Curso.objects.create(fecha_creacion=datetime.now(), nombre="Mi primer curso", profesor=self.user,
+                                      descripcion="Breve descripcion 1")
+        curso2 = Curso.objects.create(fecha_creacion=datetime.now(), nombre="Mi segundo curso", profesor=self.user,
+                                      descripcion="Breve descripcion 2")
 
         interactive_content = ContenidoInteractivo.objects.create(contenido=content, fecha_creacion=datetime.now(),
                                                                   tiene_retroalimentacion=True)
@@ -121,7 +126,8 @@ class InteractiveContentTestCase(TestCase):
 
     def test_get_marcas_from_interactive_content(self):
         content = Contenido.objects.create(url="youtube.com", nombre="Mi primer contenido", profesor=self.user)
-        interactive_content = ContenidoInteractivo.objects.create(contenido=content, fecha_creacion=datetime.now(), tiene_retroalimentacion=True)
+        interactive_content = ContenidoInteractivo.objects.create(contenido=content, fecha_creacion=datetime.now(),
+                                                                  tiene_retroalimentacion=True)
 
         marca1 = Marca.objects.create(nombre="Marca 1", punto=100, contenido=interactive_content)
         marca2 = Marca.objects.create(nombre="Marca 2", punto=200, contenido=interactive_content)
@@ -130,7 +136,52 @@ class InteractiveContentTestCase(TestCase):
                                    HTTP_AUTHORIZATION='Token ' + self.token.key)
         data = json.loads(response.content)
 
-        self.assertEqual(data['marcas'][0]['id'], 1)
+        self.assertEqual(data['marcas'][0]['id'], marca1.id)
         self.assertEqual(data['marcas'][0]['punto'], marca1.punto)
-        self.assertEqual(data['marcas'][1]['id'], 2)
+        self.assertEqual(data['marcas'][1]['id'], marca2.id)
         self.assertEqual(data['marcas'][1]['punto'], marca2.punto)
+
+
+class CourseDetailTestCase(TestCase):
+
+    url = '/content/courses/details/'
+
+    def setUp(self):
+        self.client = APIClient()
+        self.profesor = Profesor.objects.create_superuser('admin', 'admin@admin.com', 'admin123')
+        self.token_profesor = Token.objects.create(user=self.profesor)
+
+    def create_student(self):
+        estudiante = Estudiante.objects.create_user('estudiante', 'estudiante@admin.com', 'estudiante123', codigo_de_estudiante='estudiante123')
+        self.token_estudiante = Token.objects.create(user=estudiante)
+        return estudiante
+
+    def create_course(self):
+        estudiante = self.create_student()
+        curso = Curso.objects.create(profesor=self.profesor, nombre='MISO4201', descripcion='curso prueba')
+        Grupo.objects.create(curso=curso, estudiante=estudiante)
+        contenido = Contenido.objects.create(url="test.com", nombre="contenido test", profesor_id=self.profesor.id)
+        self.contenido_interactivo = ContenidoInteractivo.objects.create(nombre='test', contenido=contenido)
+        self.contenido_interactivo.curso.add(curso)
+
+    def test_get_course_detail(self):
+        self.client.force_login(user=self.profesor)
+        self.create_course()
+        response = self.client.get(self.url, HTTP_AUTHORIZATION='Token ' + self.token_profesor.key)
+        current_data = json.loads(response.content)[0]
+        self.assertEqual(current_data['nombre'], 'MISO4201')
+        self.assertEqual(current_data['descripcion'], 'curso prueba')
+        self.assertEqual(current_data['profesor'], self.profesor.id)
+        self.assertEqual(current_data['estudiantes'][0]['codigo_de_estudiante'], 'estudiante123')
+        self.assertEqual(current_data['contenido_interactivo'][0]['id'], self.contenido_interactivo.id)
+        self.assertEqual(response.status_code, 200)
+
+    def test_unauthorized_user(self):
+        estudiante = self.create_student()
+        self.client.force_login(user=estudiante)
+        response = self.client.get(self.url, HTTP_AUTHORIZATION='Token ' + self.token_estudiante.key)
+        current_data = json.loads(response.content)
+        self.assertEqual(current_data['detail'], 'You do not have permission to perform this action.')
+        self.assertEqual(response.status_code, 403)
+
+
