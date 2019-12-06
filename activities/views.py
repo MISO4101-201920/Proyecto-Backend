@@ -393,8 +393,8 @@ def get_intento_estudiante(respuestas):
 def validate_resps(resps):
     if len(resps) > 0:
             max_int = max(resps)
-        else:
-            max_int = 0
+    else:
+        max_int = 0
     
     return max_int
 
