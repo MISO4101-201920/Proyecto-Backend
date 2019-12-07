@@ -20,7 +20,7 @@ from activities.serializers import PreguntaOpcionMultipleSerializer, Calificacio
     RespuestaFoVSerializer
 from activities.models import Calificacion, Marca, RespuestmultipleEstudiante, \
     Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Pausa, PreguntaAbierta, Actividad, \
-    RespuestaAbiertaEstudiante
+    RespuestaAbiertaEstudiante, Respuesta
 
 
 # Create your views here.
@@ -300,15 +300,42 @@ def intentos_max(request):
     if request.method == 'GET':
         pregunta = request.GET.get('id_pregunta')
         estudiante = request.GET.get('id_estudiante')
+        tipo_preg = Actividad.objects.get(id=pregunta).tipoActividad
+        max_int = retrieve_max_intentos(tipo_preg, estudiante, pregunta)
+
+        return JsonResponse({'ultimo_intento': max_int}, status=status.HTTP_200_OK)
+
+
+def retrieve_max_intentos(tipo, user, pregunta):
+    if tipo == 1:
         opciones = Opcionmultiple.objects.filter(
             preguntaSeleccionMultiple=pregunta)
 
         respuestas = RespuestmultipleEstudiante.objects.filter(
-            estudiante=estudiante)
+            estudiante=user)
         resps = get_intento_estudiante(respuestas, opciones)
-        max_int = validate_resps(resps)
+        return validate_resps(resps)
 
-        return JsonResponse({'ultimo_intento': max_int}, status=status.HTTP_200_OK)
+    if tipo == 2:
+        respuestas = RespuestaVoF.objects.filter(
+            estudiante=user).filter(preguntaVoF=pregunta)
+
+        return consolida_resps(respuestas)
+
+    if tipo == 3:
+        respuestas = RespuestaAbiertaMultipleView.objects.filter(
+            estudiante=user).filter(preguntaAbierta=pregunta)
+        
+        return consolida_resps(respuestas)
+        
+
+
+def consolida_resps(respuestas):
+    resps = []
+    for resp in respuestas:
+        resps.append(resp.intento)
+
+    return validate_resps(resps)
 
 
 def get_intento_estudiante(respuestas, opciones):
