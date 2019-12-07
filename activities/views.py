@@ -323,7 +323,7 @@ def retrieve_max_intentos(tipo, user, pregunta):
         return consolida_resps(respuestas)
 
     if tipo == 3:
-        respuestas = RespuestaAbiertaMultipleView.objects.filter(
+        respuestas = RespuestaAbiertaEstudiante.objects.filter(
             estudiante=user).filter(preguntaAbierta=pregunta)
         
         return consolida_resps(respuestas)
