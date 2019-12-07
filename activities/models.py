@@ -44,7 +44,7 @@ class PreguntaAbierta(Actividad):
 
 
 class Pausa(Actividad):
-    enunciado = models.CharField(max_length=200)
+    enunciado = models.CharField(max_length=1000)
     tiempo = models.FloatField(default=0)
 
 

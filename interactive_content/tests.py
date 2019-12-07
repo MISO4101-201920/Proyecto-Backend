@@ -141,6 +141,20 @@ class InteractiveContentTestCase(TestCase):
         self.assertEqual(data['marcas'][1]['id'], marca2.id)
         self.assertEqual(data['marcas'][1]['punto'], marca2.punto)
 
+    def test_get_courses_from_student(self):
+        student = Estudiante.objects.create_user('estudiante', 'estudiante@estudiante.com', 'abcd123.')
+        course = Curso.objects.create(fecha_creacion=datetime.now(), nombre='CS101', profesor=self.user, descripcion='Intro to Computer Science')
+        group = Grupo.objects.create(curso=course, estudiante=student)
+
+        token, created = Token.objects.get_or_create(user=student)
+        student_token = token.key if created else ''
+
+        response = self.client.get('/content/mycourses', format='json', headers=self.headers, HTTP_AUTHORIZATION='Token ' + student_token)
+
+        data = json.loads(response.content)
+
+        self.assertEqual(data[0]['nombre'], course.nombre)
+        self.assertEqual(data[0]['nombre'], group.curso.nombre)
 
 class CourseDetailTestCase(TestCase):
 

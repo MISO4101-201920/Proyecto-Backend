@@ -35,4 +35,4 @@ class Estudiante(Usuario):
         verbose_name_plural = 'estudiantes'
 
     def __str__(self):
-        return self.first_name + '-' + self.codigo_de_estudiante
+        return str(self.first_name) + '-' + str(self.codigo_de_estudiante)
