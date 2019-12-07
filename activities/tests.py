@@ -2,15 +2,12 @@ from django.test import TestCase
 from django.utils.timezone import make_aware
 from datetime import datetime
 import json
-from rest_framework.test import APIClient
 from rest_framework.utils import json
-from django.contrib.auth.models import User, AbstractUser
-from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from interactive_content.models import ContenidoInteractivo, Contenido, Curso, Grupo
-from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, RespuestmultipleEstudiante, PreguntaFoV, Pausa,\
-    PreguntaAbierta, RespuestaAbiertaEstudiante, PreguntaFoV, RespuestaVoF
+from activities.models import Marca, PreguntaOpcionMultiple, Opcionmultiple, Calificacion, Pausa,\
+    PreguntaAbierta, PreguntaFoV
 
 from users.models import Profesor, Estudiante
 from rest_framework.authtoken.models import Token
@@ -272,8 +269,7 @@ class PreguntaFoVTestCase(TestCase):
 
     def test_create_question(self):
         self.client = APIClient()
-        marca, profesor, estudiante, contInterac = escenario3()
-        token_prof = Token.objects.create(user=profesor)
+        marca, profesor, estudiante, _ = escenario3()
         url = "/activities/pregunta_f_v/create"
         pregunta = {
             "nombre": "test",
@@ -289,7 +285,7 @@ class PreguntaFoVTestCase(TestCase):
         self.assertEqual(response.status_code, 201)
 
     def test_filter_question(self):
-        marca, profesor, estudiante, contInteract = escenario3()
+        marca, profesor, estudiante, _ = escenario3()
         token_student = Token.objects.create(user=estudiante)
         marca2 = escenario()
         pregunta1 = PreguntaFoV(nombre='test', numeroDeIntentos=1, marca=marca,

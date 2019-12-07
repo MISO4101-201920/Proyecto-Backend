@@ -20,7 +20,7 @@ from activities.serializers import PreguntaOpcionMultipleSerializer, Calificacio
     RespuestaFoVSerializer
 from activities.models import Calificacion, Marca, RespuestmultipleEstudiante, \
     Opcionmultiple, PreguntaOpcionMultiple, PreguntaFoV, RespuestaVoF, Pausa, PreguntaAbierta, Actividad, \
-    RespuestaAbiertaEstudiante, Respuesta
+    RespuestaAbiertaEstudiante
 
 
 # Create your views here.
@@ -329,7 +329,6 @@ def retrieve_max_intentos(tipo, user, pregunta):
         return consolida_resps(respuestas)
         
 
-
 def consolida_resps(respuestas):
     resps = []
     for resp in respuestas:
@@ -436,14 +435,14 @@ class RespuestaFoVMultipleView(ListModelMixin, CreateModelMixin, GenericAPIView)
         return self.create(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
-         # Validacion de respuesta en blanco (null)
+        # Validacion de respuesta en blanco (null)
         if self.request.data['preguntaVoF']:
             pregunta1 = PreguntaFoV.objects.filter(
                 id=self.request.data['preguntaVoF']
             )
             pregunta = pregunta1[0]
 
-           # pregunta = pregunta1[0].preguntaSeleccionMultiple
+            # pregunta = pregunta1[0].preguntaSeleccionMultiple
             # valida si el intento de la respuesta es menor o igual al max de intentos permitidos
             if int(self.request.data['intento']) <= pregunta.numeroDeIntentos:
                 serializer = self.get_serializer(data=request.data)

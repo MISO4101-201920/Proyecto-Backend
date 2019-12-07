@@ -1,6 +1,5 @@
-from django.core import serializers
 from django.db.models import Subquery
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
@@ -13,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.utils import json
 from rest_framework.views import APIView
 
-from users.models import Estudiante, Usuario, Profesor
+from users.models import Profesor
 from interactive_content.permissions import IsProfesor
 from interactive_content.models import Contenido, Curso, ContenidoInteractivo, Grupo
 from interactive_content.serializers import CursoSerializer, ContenidoInteractivoSerializer, ContenidoSerializer, \
