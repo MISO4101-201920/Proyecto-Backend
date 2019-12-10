@@ -132,6 +132,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # heroku workaround (codeship)
 if '/app' in os.environ['HOME']:
     import django_heroku
+
     django_heroku.settings(locals())
 
 # sslmode issue workaround (local development)
