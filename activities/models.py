@@ -19,6 +19,7 @@ class Actividad(models.Model):
     tieneRetroalimentacion = models.BooleanField(default=False)
     marca = models.ForeignKey(Marca, on_delete=models.CASCADE)
     retroalimentacion = models.CharField(max_length=200, null=True, blank=True)
+    tipoActividad = models.IntegerField(blank=False, default=0)
 
     def __str__(self):
         return self.nombre
@@ -43,7 +44,7 @@ class PreguntaAbierta(Actividad):
 
 
 class Pausa(Actividad):
-    enunciado = models.CharField(max_length=200)
+    enunciado = models.CharField(max_length=1000)
     tiempo = models.FloatField(default=0)
 
 

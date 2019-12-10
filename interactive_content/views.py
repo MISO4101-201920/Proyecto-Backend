@@ -12,8 +12,11 @@ from rest_framework.response import Response
 from rest_framework.utils import json
 from rest_framework.views import APIView
 
+from users.models import Profesor
+from interactive_content.permissions import IsProfesor
 from interactive_content.models import Contenido, Curso, ContenidoInteractivo, Grupo
-from interactive_content.serializers import CursoSerializer, ContenidoInteractivoSerializer, ContenidoSerializer
+from interactive_content.serializers import CursoSerializer, ContenidoInteractivoSerializer, ContenidoSerializer, \
+    CursoDetailsSerializer, ContenidoInteractivoFieldsSerializer
 
 
 def get_interactive_contents(user_id):
@@ -62,6 +65,24 @@ def set_contents(resources, user_id):
     ci.curso.add(*objetos)
     return JsonResponse({'status': 'success'})
 
+# Retorna la lista de cursos con su contenido interactivo para cada estudiante
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_student_courses_and_interactive_content(request):
+    user = request.user
+    print(type(user))
+    print(isinstance(user, Profesor))
+    if request.method == 'GET':
+        data = []
+        grupos = Grupo.objects.filter(estudiante=user)
+
+        for grupo in grupos:
+            data.append({"grupo":grupo.id,"curso":grupo.curso.id,"nombre":grupo.curso.nombre,"contenido_interactivo":[]})
+            for element in ContenidoInteractivo.objects.filter(curso=grupo.curso):
+                data[-1]['contenido_interactivo'].append(ContenidoInteractivoFieldsSerializer(element).data)
+
+        return JsonResponse(data, safe=False)
 
 # Verificar que solo sea un usuario profesor el que acceda a este endpoint
 # Remove this authentication_classes. Only for testing
@@ -142,6 +163,7 @@ def courses_view(request):
         response.renderer_context = {}
         return response
 
+
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -212,3 +234,16 @@ class ContenidoInteractivoDetail(RetrieveUpdateDestroyAPIView):
     queryset = ContenidoInteractivo.objects.all()
     serializer_class = ContenidoInteractivoSerializer
     authentication_classes = (TokenAuthentication,)
+
+
+class GetCourseView(APIView):
+    queryset = Curso.objects.all()
+    serializer_class = CursoSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = [IsAuthenticated, IsProfesor]
+
+    @staticmethod
+    def get(request):
+        cursos = Curso.objects.filter(profesor=request.user)
+        serializer = CursoDetailsSerializer(cursos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
