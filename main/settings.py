@@ -18,7 +18,7 @@ import dj_database_url
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/ 
+# See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'pn_-msnzco)&duo0i_p=o7ge764jur3dc=tuaf_#x)bq3v@6_$'
@@ -133,13 +133,12 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # heroku workaround (codeship)
 if '/app' in os.environ['HOME']:
     import django_heroku
-
     django_heroku.settings(locals())
 
 # sslmode issue workaround (local development)
-import django_heroku
-django_heroku.settings(locals())
-del DATABASES['default']['OPTIONS']['sslmode']
+#import django_heroku
+#django_heroku.settings(locals())
+#del DATABASES['default']['OPTIONS']['sslmode']
 
 REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
