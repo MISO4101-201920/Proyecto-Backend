@@ -341,7 +341,7 @@ class PauseTestCase(TestCase):
         actividad_dict = dict(nombre='prueba 1',
                               numeroDeIntentos=1,
                               tieneRetroalimentacion=True,
-                              marca=marca.id,
+                              marca_id=marca.id,
                               retroalimentacion='',
                               enunciado='Este es el enunciado de la pausa',
                               tiempo=5.0

@@ -367,7 +367,7 @@ class PausaDetail(ListCreateAPIView):
         question_data = request.data
         marca = createOrGetMarca(question_data)
         question = Pausa.objects.create(marca=marca, **question_data)
-        return Response(data=PausaSerializer(question).data)
+        return Response(data=PausaSerializer(question).data, status=status.HTTP_201_CREATED)
 
 
 def tipo_actividad(request):
