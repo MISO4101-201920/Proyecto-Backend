@@ -355,7 +355,7 @@ class PauseTestCase(TestCase):
 
     def test_pause_creation_by_estudiante(self):
         marca = escenario()
-        url = '/activities/create-pausa/'
+        url = '/activities/create-pausa/' 
         actividad_dict = dict(nombre='prueba 1',
                               numeroDeIntentos=1,
                               tieneRetroalimentacion=True,
